@@ -38,11 +38,12 @@ class AJXPlugin implements Plugin<Project> {
         }
 
         project.dependencies {
-            if (project.gradle.gradleVersion > "4.0") {
-                project.logger.debug("gradlew version > 4.0")
+            def gradleVersion = project.gradle.gradleVersion
+            if (gradleVersion > "4.0") {
+                project.logger.quiet("[ajx] gradle version[$gradleVersion] > 4.0")
                 implementation 'org.aspectj:aspectjrt:1.9.6'
             } else {
-                project.logger.debug("gradlew version < 4.0")
+                project.logger.quiet("[ajx] gradle version[$gradleVersion] < 4.0")
                 compile 'org.aspectj:aspectjrt:1.9.6'
             }
         }
@@ -55,6 +56,7 @@ class AJXPlugin implements Plugin<Project> {
 
             //register AspectTransform
             AppExtension android = project.extensions.getByType(AppExtension)
+            project.logger.quiet("[ajx] register AJXTransform")
             android.registerTransform(new AJXTransform(project))
         }
     }

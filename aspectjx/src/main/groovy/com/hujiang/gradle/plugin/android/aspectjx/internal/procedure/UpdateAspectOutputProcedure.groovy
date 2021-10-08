@@ -20,23 +20,26 @@ import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXTask
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXTaskManager
+import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.AJXCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-23
+ * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class UpdateAspectOutputProcedure extends AbsProcedure {
     AJXTaskManager ajxTaskManager
 
     UpdateAspectOutputProcedure(Project project, VariantCache variantCache, TransformInvocation transformInvocation) {
         super(project, variantCache, transformInvocation)
-        ajxTaskManager = new AJXTaskManager(encoding: ajxCache.encoding, ajcArgs: ajxCache.ajxExtensionConfig.ajcArgs, bootClassPath: ajxCache.bootClassPath,
-                            sourceCompatibility: ajxCache.sourceCompatibility, targetCompatibility: ajxCache.targetCompatibility)
+        AJXCache ajxCache = variantCache.ajxCache
+        ajxTaskManager = new AJXTaskManager(encoding: ajxCache.encoding,
+                ajcArgs: ajxCache.ajxExtensionConfig.ajcArgs,
+                bootClassPath: ajxCache.bootClassPath,
+                sourceCompatibility: ajxCache.sourceCompatibility,
+                targetCompatibility: ajxCache.targetCompatibility)
     }
 
     @Override
@@ -46,11 +49,19 @@ class UpdateAspectOutputProcedure extends AbsProcedure {
         ajxTaskManager.classPath << variantCache.includeFileDir
         ajxTaskManager.classPath << variantCache.excludeFileDir
 
-        if (variantCache.incrementalStatus.isAspectChanged || variantCache.incrementalStatus.isIncludeFileChanged) {
+        def isAspectChanged = variantCache.incrementalStatus.isAspectChanged
+        def isIncludeFileChanged = variantCache.incrementalStatus.isIncludeFileChanged
+        if (isAspectChanged) {
+            project.logger.warn("[ajx][$variantCache.variantName] aspect file changed, need rerun.")
+        }
+        if (isAspectChanged || isIncludeFileChanged) {
             //process class files
             AJXTask ajxTask = new AJXTask(project)
-            File outputJar = transformInvocation.getOutputProvider().getContentLocation("include", variantCache.contentTypes,
-                    variantCache.scopes, Format.JAR)
+            File outputJar = transformInvocation.getOutputProvider().getContentLocation(
+                    "include",
+                    variantCache.contentTypes,
+                    variantCache.scopes,
+                    Format.JAR)
             FileUtils.deleteQuietly(outputJar)
 
             ajxTask.outputJar = outputJar.absolutePath
@@ -62,32 +73,28 @@ class UpdateAspectOutputProcedure extends AbsProcedure {
         transformInvocation.inputs.each { TransformInput input ->
             input.jarInputs.each { JarInput jarInput ->
                 ajxTaskManager.classPath << jarInput.file
-                File outputJar = transformInvocation.getOutputProvider().getContentLocation(jarInput.name, jarInput.getContentTypes(),
-                        jarInput.getScopes(), Format.JAR)
+                File outputJar = transformInvocation.getOutputProvider().getContentLocation(
+                        jarInput.name,
+                        jarInput.getContentTypes(),
+                        jarInput.getScopes(),
+                        Format.JAR)
 
                 if (!outputJar.getParentFile()?.exists()) {
                     outputJar.getParentFile()?.mkdirs()
                 }
 
                 if (variantCache.isIncludeJar(jarInput.file.absolutePath)) {
-                    if (variantCache.incrementalStatus.isAspectChanged) {
+                    // 规则文件变更，删除重新处理
+                    if (isAspectChanged) {
                         FileUtils.deleteQuietly(outputJar)
+                    }
+                    if (!outputJar.exists()) {
+                        AJXTask jarTask = new AJXTask(project)
+                        jarTask.inPath << jarInput.file
 
-                        AJXTask ajxTask1 = new AJXTask(project)
-                        ajxTask1.inPath << jarInput.file
+                        jarTask.outputJar = outputJar.absolutePath
 
-                        ajxTask1.outputJar = outputJar.absolutePath
-
-                        ajxTaskManager.addTask(ajxTask1)
-                    } else {
-                        if (!outputJar.exists()) {
-                            AJXTask ajxTask1 = new AJXTask(project)
-                            ajxTask1.inPath << jarInput.file
-
-                            ajxTask1.outputJar = outputJar.absolutePath
-
-                            ajxTaskManager.addTask(ajxTask1)
-                        }
+                        ajxTaskManager.addTask(jarTask)
                     }
                 }
             }

@@ -28,9 +28,7 @@ import org.gradle.api.Project
  */
 abstract class AbsProcedure {
 
-    List<? extends AbsProcedure> procedures = new ArrayList<>()
     Project project
-    AJXCache ajxCache
     AJXExtensionConfig ajxExtensionConfig
     VariantCache variantCache
     TransformInvocation transformInvocation
@@ -43,25 +41,9 @@ abstract class AbsProcedure {
 
         if (variantCache != null) {
             this.variantCache = variantCache
-            this.ajxCache = variantCache.ajxCache
-            this.ajxExtensionConfig = ajxCache.ajxExtensionConfig
+            this.ajxExtensionConfig = variantCache.ajxCache.ajxExtensionConfig
         }
     }
 
-    public <T extends AbsProcedure> AbsProcedure with(T procedure) {
-        if (procedure != null) {
-            procedures << procedure
-        }
-
-        return this
-    }
-
-    boolean doWorkContinuously() {
-        for (AbsProcedure procedure : procedures) {
-            if (!procedure.doWorkContinuously()) {
-                break
-            }
-        }
-        return true
-    }
+    abstract boolean doWorkContinuously()
 }

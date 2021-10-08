@@ -1,20 +1,21 @@
 apply plugin: 'maven'
 
-version=LIB_VERSION
+version = LIB_VERSION
 group = LIB_GROUP
-def nexusRepositoryUrl=nexusReleases
+def nexusRepositoryUrl = nexusReleases
 
-if (!LIB_ISRELEASE.toBoolean()){
+if (!LIB_ISRELEASE.toBoolean()) {
     version = "${version}-SNAPSHOT"
-    nexusRepositoryUrl=nexusSnapshots
+    nexusRepositoryUrl = nexusSnapshots
 }
 
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "$nexusRepositoryUrl") {
-                authentication(userName: nexusUserName, password: nexusPassword)
-            }
+//            repository(url: "$nexusRepositoryUrl") {
+//                authentication(userName: nexusUserName, password: nexusPassword)
+//            }
+            repository(url: uri(rootProject.file('../localRepo')))
 
             pom.project {
                 name LIB_ARTIFACT

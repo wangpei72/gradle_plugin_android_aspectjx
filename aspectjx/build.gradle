@@ -6,9 +6,6 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.9.9'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
     }
 }
 
@@ -18,12 +15,6 @@ apply plugin: 'maven'
 
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
-
-jar {
-    from {
-        zipTree(new File(project.projectDir.absolutePath + "/libs/aspectjtools.jar"))
-    }
-}
 
 dependencies {
     repositories {
@@ -36,12 +27,10 @@ dependencies {
     compile localGroovy()
 
     compile 'com.android.tools.build:gradle:3.6.1'
+    // 因为修复多线程问题拷贝了源码类修改来覆盖，所以升级aspectjtools时要注意是否需要重新拷贝修改
     compile "org.aspectj:aspectjtools:1.9.6"
     compile 'com.google.code.gson:gson:2.8.2'
 
-//    compile 'commons-io:commons-io:2.4'
-//    compile files('libs/aspectjtools.jar')
 }
 
-apply from: 'bintray.gradle'
 apply from: 'maven.gradle'

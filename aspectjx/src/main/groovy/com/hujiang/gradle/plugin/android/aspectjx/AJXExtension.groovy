@@ -18,21 +18,19 @@ package com.hujiang.gradle.plugin.android.aspectjx
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2016-05-05
+ * @author simon* @version 1.0.0* @since 2016-05-05
  */
 class AJXExtension {
 
     List<String> includes = new ArrayList<>()
     List<String> excludes = new ArrayList<>()
 
-    List<String> ajcArgs=new ArrayList<>()
+    List<String> ajcArgs = new ArrayList<>()
 
     boolean enabled = true
 
 
-    AJXExtension include(String...filters) {
+    AJXExtension include(String... filters) {
         if (filters != null) {
             this.includes.addAll(filters)
         }
@@ -40,7 +38,7 @@ class AJXExtension {
         return this
     }
 
-    AJXExtension exclude(String...filters) {
+    AJXExtension exclude(String... filters) {
         if (filters != null) {
             this.excludes.addAll(filters)
         }
@@ -48,7 +46,7 @@ class AJXExtension {
         return this
     }
 
-    AJXExtension ajcArgs(String...ajcArgs) {
+    AJXExtension ajcArgs(String... ajcArgs) {
         if (ajcArgs != null) {
             this.ajcArgs.addAll(ajcArgs)
         }

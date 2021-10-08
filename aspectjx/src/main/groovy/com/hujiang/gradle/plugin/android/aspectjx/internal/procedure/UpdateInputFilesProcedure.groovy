@@ -83,15 +83,21 @@ class UpdateInputFilesProcedure extends AbsProcedure {
                         }
                         //如果include files 发生变化，则删除include输出jar
                         if (variantCache.incrementalStatus.isIncludeFileChanged) {
-                            File includeOutputJar = transformInvocation.outputProvider.getContentLocation("include", variantCache.contentTypes,
-                                    variantCache.scopes, Format.JAR)
+                            File includeOutputJar = transformInvocation.outputProvider.getContentLocation(
+                                    "include",
+                                    variantCache.contentTypes,
+                                    variantCache.scopes,
+                                    Format.JAR)
                             FileUtils.deleteQuietly(includeOutputJar)
                         }
 
                         //如果exclude files发生变化，则重新生成exclude jar到输出目录
                         if (variantCache.incrementalStatus.isExcludeFileChanged) {
-                            File excludeOutputJar = transformInvocation.outputProvider.getContentLocation("exclude", variantCache.contentTypes,
-                                    variantCache.scopes, Format.JAR)
+                            File excludeOutputJar = transformInvocation.outputProvider.getContentLocation(
+                                    "exclude",
+                                    variantCache.contentTypes,
+                                    variantCache.scopes,
+                                    Format.JAR)
                             FileUtils.deleteQuietly(excludeOutputJar)
                             AJXUtils.mergeJar(variantCache.excludeFileDir, excludeOutputJar)
                         }
@@ -109,7 +115,11 @@ class UpdateInputFilesProcedure extends AbsProcedure {
                             project.logger.debug("~~~~~~~changed file::${jarInput.status.name()}::${jarInput.file.absolutePath}")
 
                             String filePath = jarInput.file.absolutePath
-                            File outputJar = transformInvocation.outputProvider.getContentLocation(jarInput.name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
+                            File outputJar = transformInvocation.outputProvider.getContentLocation(
+                                    jarInput.name,
+                                    jarInput.contentTypes,
+                                    jarInput.scopes,
+                                    Format.JAR)
 
                             if (jarInput.status == Status.REMOVED) {
                                 variantCache.removeIncludeJar(filePath)
