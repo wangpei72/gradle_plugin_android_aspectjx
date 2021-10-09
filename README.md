@@ -7,7 +7,7 @@ AspectJX
 
 ## 最新版本（2.0.11）
 
-[查看完整版本日志](README.md)
+[查看完整版本日志](CHANGELOG.md)
 
 > 开发中的测试版本访问：[Sonatype's snapshot repository](https://s01.oss.sonatype.org/content/repositories/snapshots/io/github/wurensen/gradle-android-plugin-aspectjx/)
 
@@ -41,7 +41,7 @@ apply plugin: 'com.hujiang.android-aspectjx'
 ```groovy
 aspectjx {
     // 排除所有package路径中包含`android.support`的class文件及库（jar文件）
-	exclude 'android.support'
+    exclude 'android.support'
 }
 ```
 
@@ -53,7 +53,7 @@ aspectjx {
 ```groovy
 aspectjx {
     // 忽略所有的class文件及jar文件，相当于AspectJX不生效
-	exclude '*'
+    exclude '*'
 }
 ```
 
@@ -64,7 +64,7 @@ aspectjx {
 ```groovy
 aspectjx {
     // 关闭AspectJX功能
-	enabled false
+    enabled false
 }
 ```
 
