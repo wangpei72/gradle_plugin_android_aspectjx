@@ -23,9 +23,7 @@ import org.gradle.api.Project
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-03-14
+ * @author simon* @version 1.0.0* @since 2018-03-14
  */
 class AJXTask implements ITask {
 
@@ -47,6 +45,15 @@ class AJXTask implements ITask {
 
     @Override
     Object call() throws Exception {
+        /*
+        -classpath：class和source 的位置
+        -aspectpath： 定义了切面规则的class
+        -d：指定输出的目录
+        -outjar：指定输出的jar上
+        -inpath：需要处理的.class
+        classpath 的作用是在当解析一个类的时候，当这个类是不在inpath 中，会从classpath 中寻找。
+        在使用AspectJ的时候, 我们用以下几个方面来优化我们的速度。
+        * */
         final def log = project.logger
         def args = [
                 "-showWeaveInfo",
@@ -76,7 +83,7 @@ class AJXTask implements ITask {
             args << outputJar
         }
 
-        if(ajcArgs != null && !ajcArgs.isEmpty()) {
+        if (ajcArgs != null && !ajcArgs.isEmpty()) {
             if (!ajcArgs.contains('-Xlint')) {
                 args.add('-Xlint:ignore')
             }
@@ -90,8 +97,8 @@ class AJXTask implements ITask {
             args.add('-warn:none')
         }
 
-        inPath.each {File file ->
-            println "~~~~~~~~~~~~~input file: ${file.absolutePath}"
+        inPath.each { File file ->
+            project.logger.debug("~~~~~~~~~~~~~input file: ${file.absolutePath}")
         }
 
         MessageHandler handler = new MessageHandler(true)

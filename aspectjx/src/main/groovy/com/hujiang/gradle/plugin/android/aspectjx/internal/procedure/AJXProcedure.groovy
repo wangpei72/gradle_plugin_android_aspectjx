@@ -14,60 +14,36 @@
  */
 package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
-import com.hujiang.gradle.plugin.android.aspectjx.AJXConfig
-import com.hujiang.gradle.plugin.android.aspectjx.AJXExtension
-import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.AJXCache
-import org.aspectj.weaver.Dump
+
 import org.gradle.api.Project
-import org.gradle.api.tasks.compile.JavaCompile
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-20
+ * @author simon* @version 1.0.0* @since 2018-04-20
  */
 class AJXProcedure extends AbsProcedure {
 
-    Project project
-    AJXCache ajxCache
+    List<? extends AbsProcedure> procedures = new ArrayList<>()
 
     AJXProcedure(Project proj) {
         super(proj, null, null)
+    }
 
-        project = proj
-        ajxCache = new AJXCache(project)
-
-        System.setProperty("aspectj.multithreaded", "true")
-
-        def configuration = new AJXConfig(project)
-
-        project.afterEvaluate {
-            configuration.variants.all { variant ->
-                JavaCompile javaCompile = variant.hasProperty('javaCompiler') ? variant.javaCompiler : variant.javaCompile
-                ajxCache.encoding = javaCompile.options.encoding
-                ajxCache.bootClassPath = configuration.bootClasspath.join(File.pathSeparator)
-                ajxCache.sourceCompatibility = javaCompile.sourceCompatibility
-                ajxCache.targetCompatibility = javaCompile.targetCompatibility
-            }
-
-            AJXExtension ajxExtension = project.aspectjx
-            //当过滤条件发生变化，clean掉编译缓存
-            if (ajxCache.isExtensionChanged(ajxExtension)) {
-                project.tasks.findByName('preBuild').dependsOn(project.tasks.findByName("clean"))
-            }
-
-            ajxCache.putExtensionConfig(ajxExtension)
-
-            ajxCache.ajcArgs = ajxExtension.ajcArgs
+    public <T extends AbsProcedure> AbsProcedure with(T procedure) {
+        if (procedure != null) {
+            procedures << procedure
         }
 
-        //set aspectj build log output dir
-        File logDir = new File(project.buildDir.absolutePath + File.separator + "outputs" + File.separator + "logs")
-        if (!logDir.exists()) {
-            logDir.mkdirs()
-        }
+        return this
+    }
 
-        Dump.setDumpDirectory(logDir.absolutePath)
+    @Override
+    boolean doWorkContinuously() {
+        for (AbsProcedure procedure : procedures) {
+            if (!procedure.doWorkContinuously()) {
+                break
+            }
+        }
+        return true
     }
 }

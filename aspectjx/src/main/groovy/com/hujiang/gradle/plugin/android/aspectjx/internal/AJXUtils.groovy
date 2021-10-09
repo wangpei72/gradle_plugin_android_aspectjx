@@ -19,10 +19,12 @@ import com.android.build.api.transform.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import com.hujiang.gradle.plugin.android.aspectjx.AJXPlugin
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import org.apache.commons.io.FileUtils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
+import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Type
 import java.util.jar.JarEntry
@@ -30,9 +32,7 @@ import java.util.jar.JarFile
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-02-01
+ * @author simon* @version 1.0.0* @since 2018-02-01
  */
 class AJXUtils {
 
@@ -69,15 +69,15 @@ class AJXUtils {
     static FileType fileType(File file) {
         String filePath = file?.getAbsolutePath()
 
-        if (filePath?.toLowerCase().endsWith('.java')) {
+        if (filePath?.toLowerCase()?.endsWith('.java')) {
             return FileType.JAVA
-        } else if (filePath?.toLowerCase().endsWith('.class')) {
+        } else if (filePath?.toLowerCase()?.endsWith('.class')) {
             return FileType.CLASS
-        } else if (filePath?.toLowerCase().endsWith('.jar')) {
+        } else if (filePath?.toLowerCase()?.endsWith('.jar')) {
             return FileType.JAR
-        } else if (filePath?.toLowerCase().endsWith('.kt')) {
+        } else if (filePath?.toLowerCase()?.endsWith('.kt')) {
             return FileType.KOTLIN
-        } else if (filePath?.toLowerCase().endsWith('.groovy')) {
+        } else if (filePath?.toLowerCase()?.endsWith('.groovy')) {
             return FileType.GROOVY
         } else {
             return FileType.DEFAULT
@@ -89,7 +89,7 @@ class AJXUtils {
     }
 
     static boolean isClassFile(String filePath) {
-        return filePath?.toLowerCase().endsWith('.class')
+        return filePath?.toLowerCase()?.endsWith('.class')
     }
 
     static <T> T fromJsonStringThrowEx(String jsonString, Class<T> clazz) throws JsonSyntaxException {
@@ -100,8 +100,9 @@ class AJXUtils {
         try {
             return gson.fromJson(jsonString, clazz)
         } catch (Throwable e) {
-            e.printStackTrace()
+            LoggerFactory.getLogger(AJXPlugin).warn("optFromJsonString(${jsonString}, ${clazz}", e)
         }
+        return null
     }
 
     static <T> T fromJsonStringThrowEx(String jsonString, Type typeOfT) throws JsonSyntaxException {
@@ -112,11 +113,12 @@ class AJXUtils {
         try {
             return gson.fromJson(json, typeOfT)
         } catch (JsonSyntaxException var3) {
-            var3.printStackTrace()
+            LoggerFactory.getLogger(AJXPlugin).warn("optFromJsonString(${json}, ${typeOfT}", var3)
         }
+        return null
     }
 
-    static String toJsonStringThrowEx(Object object) throws Exception  {
+    static String toJsonStringThrowEx(Object object) throws Exception {
         return getGson().toJson(object)
     }
 
@@ -124,16 +126,16 @@ class AJXUtils {
         try {
             return getGson().toJson(object)
         } catch (Throwable var2) {
-            var2.printStackTrace()
+            LoggerFactory.getLogger(AJXPlugin).warn("optToJsonString(${object}", var2)
         }
+        return null
     }
 
     /**
-     *
      * @param transformInvocation
      */
     static void doWorkWithNoAspectj(TransformInvocation transformInvocation) {
-        println "do nothing ~~~~~~~~~~~~~~~~~~~~~~~~"
+        LoggerFactory.getLogger(AJXPlugin).debug("do nothing ~~~~~~~~~~~~~~~~~~~~~~~~")
         if (transformInvocation.incremental) {
             incrementalCopyFiles(transformInvocation)
         } else {
@@ -145,12 +147,12 @@ class AJXUtils {
         transformInvocation.outputProvider.deleteAll()
 
         transformInvocation.inputs.each { TransformInput input ->
-            input.directoryInputs.each { DirectoryInput dirInput->
+            input.directoryInputs.each { DirectoryInput dirInput ->
                 File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
-                AJXUtils.mergeJar(dirInput.file, excludeJar)
+                mergeJar(dirInput.file, excludeJar)
             }
 
-            input.jarInputs.each { JarInput jarInput->
+            input.jarInputs.each { JarInput jarInput ->
                 def dest = transformInvocation.outputProvider.getContentLocation(jarInput.name
                         , jarInput.contentTypes
                         , jarInput.scopes
@@ -161,15 +163,15 @@ class AJXUtils {
     }
 
     static void incrementalCopyFiles(TransformInvocation transformInvocation) {
-        transformInvocation.inputs.each {TransformInput input ->
-            input.directoryInputs.each {DirectoryInput dirInput ->
+        transformInvocation.inputs.each { TransformInput input ->
+            input.directoryInputs.each { DirectoryInput dirInput ->
                 if (dirInput.changedFiles.size() > 0) {
                     File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
-                    AJXUtils.mergeJar(dirInput.file, excludeJar)
+                    mergeJar(dirInput.file, excludeJar)
                 }
             }
 
-            input.jarInputs.each {JarInput jarInput ->
+            input.jarInputs.each { JarInput jarInput ->
                 File target = transformInvocation.outputProvider.getContentLocation(jarInput.name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
                 switch (jarInput.status) {
                     case Status.REMOVED:
@@ -180,7 +182,7 @@ class AJXUtils {
                         FileUtils.copyFile(jarInput.file, target)
                         break
                     case Status.ADDED:
-                        FileUtils.copyFile(jarInput, target)
+                        FileUtils.copyFile(jarInput.file, target)
                         break
                     default:
                         break
@@ -193,12 +195,12 @@ class AJXUtils {
         return isFilterMatched(str, filters, FilterPolicy.EXCLUDE)
     }
 
-    static boolean  isIncludeFilterMatched(String str, List<String> filters) {
+    static boolean isIncludeFilterMatched(String str, List<String> filters) {
         return isFilterMatched(str, filters, FilterPolicy.INCLUDE)
     }
 
     static boolean isFilterMatched(String str, List<String> filters, FilterPolicy filterPolicy) {
-        if(str == null) {
+        if (str == null) {
             return false
         }
 
@@ -235,8 +237,8 @@ class AJXUtils {
     }
 
     static enum FilterPolicy {
-        INCLUDE
-        , EXCLUDE
+        INCLUDE,
+        EXCLUDE
     }
 
     static int countOfFiles(File file) {
@@ -264,8 +266,9 @@ class AJXUtils {
             while (entries.hasMoreElements()) {
                 JarEntry jarEntry = entries.nextElement()
                 String entryName = jarEntry.getName()
-                String tranEntryName = entryName.replace(File.separator, ".")
+                String tranEntryName = entryName.replace("/", ".").replace("\\", ".")
                 if (isExcludeFilterMatched(tranEntryName, excludes)) {
+                    variantCache.project.logger.warn("[ajx][$variantCache.variantName] exclude jar[$jarInput.file], match point[$tranEntryName]")
                     isExclude = true
                     break
                 }
@@ -283,7 +286,7 @@ class AJXUtils {
             while (entries.hasMoreElements()) {
                 JarEntry jarEntry = entries.nextElement()
                 String entryName = jarEntry.getName()
-                String tranEntryName = entryName.replace(File.separator, ".")
+                String tranEntryName = entryName.replace("/", ".").replace("\\", ".")
                 if (isIncludeFilterMatched(tranEntryName, includes)) {
                     isInclude = true
                     break
@@ -303,13 +306,15 @@ class AJXUtils {
             while (entries.hasMoreElements()) {
                 JarEntry jarEntry = entries.nextElement()
                 String entryName = jarEntry.getName()
-                String tranEntryName = entryName.replace(File.separator, ".")
+                String tranEntryName = entryName.replace("/", ".").replace("\\", ".")
                 if (isIncludeFilterMatched(tranEntryName, includes)) {
                     isIncludeMatched = true
                 }
 
                 if (isExcludeFilterMatched(tranEntryName, excludes)) {
+                    variantCache.project.logger.warn("[ajx][$variantCache.variantName] exclude jar[$jarInput.file], match point[$tranEntryName]")
                     isExcludeMatched = true
+                    break
                 }
             }
 
@@ -348,7 +353,7 @@ class AJXUtils {
 
             jarMerger.addFolder(sourceDir)
         } catch (Exception e) {
-            e.printStackTrace()
+            LoggerFactory.getLogger(AJXPlugin).warn("mergeJar(${sourceDir}, ${targetJar}", e)
         } finally {
             jarMerger.close()
         }

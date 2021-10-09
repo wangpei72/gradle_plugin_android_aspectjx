@@ -15,23 +15,23 @@
 package com.hujiang.gradle.plugin.android.aspectjx.internal.cache
 
 import com.android.builder.model.AndroidProject
+import com.hujiang.gradle.plugin.android.aspectjx.AJXConfig
 import com.hujiang.gradle.plugin.android.aspectjx.AJXExtension
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.model.AJXExtensionConfig
 import org.apache.commons.io.FileUtils
+import org.aspectj.weaver.Dump
 import org.gradle.api.Project
+import org.gradle.api.tasks.compile.JavaCompile
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-03
+ * @author simon* @version 1.0.0* @since 2018-04-03
  */
 class AJXCache {
 
     Project project
     String cachePath
-    Map<String, VariantCache> variantCacheMap = new HashMap<>()
 
     String extensionConfigPath
     AJXExtensionConfig ajxExtensionConfig = new AJXExtensionConfig()
@@ -41,17 +41,59 @@ class AJXCache {
     String bootClassPath
     String sourceCompatibility
     String targetCompatibility
-    List<String> ajcArgs = new ArrayList<>()
 
     AJXCache(Project proj) {
         this.project = proj
-
         init()
+
+        def ajxCache = this
+        def configuration = new AJXConfig(project)
+        project.afterEvaluate {
+            def variants = configuration.variants
+            if (variants && !variants.isEmpty()) {
+                def variant = variants[0]
+                JavaCompile javaCompile
+                if (variant.hasProperty('javaCompileProvider')) {
+                    //android gradle 3.3.0 +
+                    javaCompile = variant.javaCompileProvider.get()
+                } else {
+                    javaCompile = variant.javaCompile
+                }
+
+                ajxCache.encoding = javaCompile.options.encoding
+                ajxCache.sourceCompatibility = javaCompile.sourceCompatibility
+                ajxCache.targetCompatibility = javaCompile.targetCompatibility
+            }
+            ajxCache.bootClassPath = configuration.bootClasspath.join(File.pathSeparator)
+
+            AJXExtension ajxExtension = project.aspectjx
+            project.logger.warn "[ajx] project.aspectjx=${ajxExtension}"
+
+            //当过滤条件发生变化，clean掉编译缓存
+            def isExtensionChanged = ajxCache.isExtensionChanged(ajxExtension)
+            project.logger.warn("[ajx] isExtensionChanged=" + isExtensionChanged)
+            if (isExtensionChanged) {
+                project.logger.warn("[ajx] cache changed, clean before preBuild")
+                project.tasks.findByName('preBuild').dependsOn(project.tasks.findByName("clean"))
+            }
+
+            ajxCache.putExtensionConfig(ajxExtension)
+
+            // 设置运行变量
+            System.setProperty("aspectj.multithreaded", "true")
+            // set aspectj build log output dir
+            File logDir = new File(project.buildDir.absolutePath + File.separator + "outputs"
+                    + File.separator + "logs")
+            if (!logDir.exists()) {
+                logDir.mkdirs()
+            }
+            Dump.setDumpDirectory(logDir.absolutePath)
+        }
     }
 
     private void init() {
         cachePath = project.buildDir.absolutePath + File.separator + AndroidProject.FD_INTERMEDIATES + "/ajx"
-        extensionConfigPath = cachePath + File.separator + "extensionconfig.json"
+        extensionConfigPath = cachePath + File.separator + "extensionConfig.json"
 
         if (!cacheDir.exists()) {
             cacheDir.mkdirs()
@@ -83,7 +125,7 @@ class AJXCache {
     }
 
     void commit() {
-        println "putExtensionConfig:${extensionConfigFile}"
+        project.logger.debug("putExtensionConfig:${extensionConfigFile}")
 
         FileUtils.deleteQuietly(extensionConfigFile)
 
@@ -98,22 +140,8 @@ class AJXCache {
         }
 
         String jsonString = AJXUtils.optToJsonString(ajxExtensionConfig)
-        println "${jsonString}"
+        project.logger.debug("${jsonString}")
         FileUtils.write(extensionConfigFile, jsonString, "UTF-8")
-    }
-
-    void put(String variantName, VariantCache cache) {
-        if (variantName != null && cache != null) {
-            variantCacheMap.put(variantName, cache)
-        }
-    }
-
-    boolean contains(String variantName) {
-        if (variantName == null) {
-            return false
-        }
-
-        return variantCacheMap.containsKey(variantName)
     }
 
     void putExtensionConfig(AJXExtension extension) {
@@ -138,24 +166,24 @@ class AJXCache {
         boolean isTargetExcludeExists = extension.excludes != null && !extension.excludes.isEmpty()
 
         if ((!isSourceIncludesExists && isTargetIncludeExists)
-            || (isSourceIncludesExists && !isTargetIncludeExists)
-            || (!isSourceExcludeExists && isTargetExcludeExists)
-            || (isSourceExcludeExists && !isTargetExcludeExists)) {
+                || (isSourceIncludesExists && !isTargetIncludeExists)
+                || (!isSourceExcludeExists && isTargetExcludeExists)
+                || (isSourceExcludeExists && !isTargetExcludeExists)) {
             return true
         }
 
         if ((!isSourceIncludesExists && !isTargetIncludeExists)
-            && (!isSourceExcludeExists && !isTargetExcludeExists)) {
+                && (!isSourceExcludeExists && !isTargetExcludeExists)) {
             return false
         }
 
         if (ajxExtensionConfig.includes.size() != extension.includes.size()
-            || ajxExtensionConfig.excludes.size() != extension.excludes.size()) {
+                || ajxExtensionConfig.excludes.size() != extension.excludes.size()) {
             return true
         }
 
         boolean isChanged = false
-        ajxExtensionConfig.includes.each {String source ->
+        ajxExtensionConfig.includes.each { String source ->
             boolean targetMatched = false
             for (String target : extension.includes) {
                 if (source == target) {
@@ -169,7 +197,7 @@ class AJXCache {
             }
         }
 
-        ajxExtensionConfig.excludes.each {String source ->
+        ajxExtensionConfig.excludes.each { String source ->
             boolean targetMatched = false
             for (String target : extension.excludes) {
                 if (source == target) {

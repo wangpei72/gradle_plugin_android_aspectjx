@@ -14,10 +14,9 @@
  */
 package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
-import com.android.SdkConstants
+
 import com.android.build.api.transform.*
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
-import com.hujiang.gradle.plugin.android.aspectjx.internal.JarMerger
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.BatchTaskScheduler
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.ITask
@@ -26,9 +25,7 @@ import org.gradle.api.Project
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-23
+ * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class CacheInputFilesProcedure extends AbsProcedure {
     CacheInputFilesProcedure(Project project, VariantCache variantCache, TransformInvocation transformInvocation) {
@@ -43,7 +40,7 @@ class CacheInputFilesProcedure extends AbsProcedure {
         // "**" 所有class文件和jar
         // "com.hujiang" 过滤 含"com.hujiang"的文件和jar
         //
-        println "~~~~~~~~~~~~~~~~~~~~cache input files"
+        project.logger.debug("~~~~~~~~~~~~~~~~~~~~cache input files")
         BatchTaskScheduler taskScheduler = new BatchTaskScheduler()
 
         transformInvocation.inputs.each { TransformInput input ->
@@ -68,8 +65,11 @@ class CacheInputFilesProcedure extends AbsProcedure {
 
                         //put exclude files into jar
                         if (AJXUtils.countOfFiles(variantCache.excludeFileDir) > 0) {
-                            File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", variantCache.contentTypes,
-                                    variantCache.scopes, Format.JAR)
+                            File excludeJar = transformInvocation.getOutputProvider().getContentLocation(
+                                    "exclude",
+                                    variantCache.contentTypes,
+                                    variantCache.scopes,
+                                    Format.JAR)
                             AJXUtils.mergeJar(variantCache.excludeFileDir, excludeJar)
                         }
 
@@ -84,10 +84,11 @@ class CacheInputFilesProcedure extends AbsProcedure {
                     Object call() throws Exception {
                         AJXUtils.filterJar(jarInput, variantCache, ajxExtensionConfig.includes, ajxExtensionConfig.excludes)
                         if (!variantCache.isIncludeJar(jarInput.file.absolutePath)) {
-                            def dest = transformInvocation.outputProvider.getContentLocation(jarInput.name
-                                    , jarInput.contentTypes
-                                    , jarInput.scopes
-                                    , Format.JAR)
+                            def dest = transformInvocation.outputProvider.getContentLocation(
+                                    jarInput.name,
+                                    jarInput.contentTypes,
+                                    jarInput.scopes,
+                                    Format.JAR)
                             FileUtils.copyFile(jarInput.file, dest)
                         }
 

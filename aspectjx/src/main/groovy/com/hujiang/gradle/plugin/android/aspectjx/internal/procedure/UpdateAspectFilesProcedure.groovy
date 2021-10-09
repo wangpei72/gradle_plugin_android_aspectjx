@@ -28,9 +28,7 @@ import java.util.jar.JarFile
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-23
+ * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class UpdateAspectFilesProcedure extends AbsProcedure {
     UpdateAspectFilesProcedure(Project project, VariantCache variantCache, TransformInvocation transformInvocation) {
@@ -39,18 +37,18 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
 
     @Override
     boolean doWorkContinuously() {
-        println "~~~~~~~~~~~~~~~~~~~~update aspect files"
+        project.logger.debug("~~~~~~~~~~~~~~~~~~~~update aspect files")
         //update aspect files
         BatchTaskScheduler taskScheduler = new BatchTaskScheduler()
 
-        transformInvocation.inputs.each { TransformInput input->
-            input.directoryInputs.each { DirectoryInput dirInput->
+        transformInvocation.inputs.each { TransformInput input ->
+            input.directoryInputs.each { DirectoryInput dirInput ->
                 taskScheduler.addTask(new ITask() {
                     @Override
                     Object call() throws Exception {
                         dirInput.changedFiles.each { File file, Status status ->
                             if (AJXUtils.isAspectClass(file)) {
-                                println "~~~~~~~~~~~collect aspect file from Dir:${file.absolutePath}"
+                                project.logger.warn("[ajx] collect aspect file from Dir:${file.absolutePath}")
                                 variantCache.incrementalStatus.isAspectChanged = true
                                 String path = file.absolutePath
                                 String subPath = path.substring(dirInput.file.absolutePath.length())
@@ -78,7 +76,7 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
                 })
             }
 
-            input.jarInputs.each { JarInput jarInput->
+            input.jarInputs.each { JarInput jarInput ->
                 if (jarInput.status != Status.NOTCHANGED) {
                     taskScheduler.addTask(new ITask() {
                         @Override
@@ -90,9 +88,9 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
                                 String entryName = jarEntry.getName()
                                 if (!jarEntry.isDirectory() && AJXUtils.isClassFile(entryName)) {
                                     byte[] bytes = ByteStreams.toByteArray(jarFile.getInputStream(jarEntry))
-                                    File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
                                     if (AJXUtils.isAspectClass(bytes)) {
-                                        println "~~~~~~~~~~~~~~~~~collect aspect file from JAR:${entryName}"
+                                        project.logger.warn("[ajx] collect aspect file[${entryName}] from JAR:${jarFile}")
+                                        File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
                                         variantCache.incrementalStatus.isAspectChanged = true
                                         if (jarInput.status == Status.REMOVED) {
                                             FileUtils.deleteQuietly(cacheFile)
