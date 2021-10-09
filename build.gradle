@@ -1,10 +1,7 @@
-apply from: 'ext.gradle'
-
 buildscript {
     repositories {
         mavenLocal()
         google()
-        jcenter()
     }
 }
 
@@ -13,34 +10,23 @@ allprojects {
         repositories {
             mavenLocal()
             google()
-            jcenter {
-               url 'https://jcenter.bintray.com'
-            }
         }
     }
-    
+
     dependencies {
         repositories {
             mavenLocal()
             google()
-            jcenter {
-                url 'https://jcenter.bintray.com'
-            }
         }
     }
 
-    apply plugin: 'maven'
 }
 
-["../gradle.properties", "gradle.properties"].each {
-    File propertiesFile = new File(it)
-    if (propertiesFile.exists()) {
-        Properties properties = new Properties()
-        propertiesFile.withInputStream {
-            properties.load(it)
-        }
-        properties.entrySet().each {
-            project.ext.set(it.key, it.value)
-        }
+// load local.properties
+Properties properties = new Properties()
+if (project.file('local.properties').exists()) {
+    properties.load(project.file('local.properties').newDataInputStream())
+    properties.entrySet().each {
+        project.ext.set(it.key, it.value)
     }
 }

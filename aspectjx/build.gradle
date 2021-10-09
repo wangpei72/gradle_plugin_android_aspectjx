@@ -1,8 +1,7 @@
 buildscript {
     repositories {
-        mavenLocal()
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
@@ -11,16 +10,14 @@ buildscript {
 
 
 apply plugin: 'groovy'
-apply plugin: 'maven'
 
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     repositories {
-        mavenLocal()
         google()
-        jcenter()
+        mavenCentral()
     }
 
     compile gradleApi()
@@ -33,4 +30,5 @@ dependencies {
 
 }
 
-apply from: 'maven.gradle'
+// 引用发布到maven插件
+apply from: 'plugin_maven_publish.gradle'
