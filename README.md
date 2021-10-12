@@ -27,7 +27,7 @@ buildscript {
 
     dependencies {
         // aspectj插件
-        classpath 'io.github.wurensen:gradle-android-plugin-aspectjx:2.0.11-SNAPSHOT'
+        classpath 'io.github.wurensen:gradle-android-plugin-aspectjx:<version>'
     }
 }
 ```
