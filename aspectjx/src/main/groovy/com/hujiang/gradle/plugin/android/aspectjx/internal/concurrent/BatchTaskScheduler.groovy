@@ -27,7 +27,11 @@ class BatchTaskScheduler {
     List<? extends ITask> tasks = new ArrayList<>()
 
     BatchTaskScheduler() {
-        executorService = Executors.newScheduledThreadPool(Runtime.runtime.availableProcessors() + 1)
+        this(Runtime.runtime.availableProcessors() + 1)
+    }
+
+    BatchTaskScheduler(int corePoolSize) {
+        executorService = Executors.newScheduledThreadPool(corePoolSize)
     }
 
     public <T extends ITask> void addTask(T task) {
