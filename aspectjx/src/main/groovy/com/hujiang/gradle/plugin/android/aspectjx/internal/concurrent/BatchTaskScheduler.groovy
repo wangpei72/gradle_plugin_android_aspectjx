@@ -19,17 +19,19 @@ import java.util.concurrent.Executors
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-04
+ * @author simon* @version 1.0.0* @since 2018-04-04
  */
 class BatchTaskScheduler {
 
     ExecutorService executorService
-    List< ? extends ITask> tasks = new ArrayList<>()
+    List<? extends ITask> tasks = new ArrayList<>()
 
     BatchTaskScheduler() {
-        executorService = Executors.newScheduledThreadPool(Runtime.runtime.availableProcessors() + 1)
+        this(Runtime.runtime.availableProcessors() + 1)
+    }
+
+    BatchTaskScheduler(int corePoolSize) {
+        executorService = Executors.newScheduledThreadPool(corePoolSize)
     }
 
     public <T extends ITask> void addTask(T task) {
@@ -37,7 +39,14 @@ class BatchTaskScheduler {
     }
 
     void execute() {
-        executorService.invokeAll(tasks)
+        def all = executorService.invokeAll(tasks)
+        all.each {
+            def get = it.get()
+            if (get instanceof Throwable) {
+                // 发生异常，中断构建
+                throw get
+            }
+        }
 
         tasks.clear()
     }

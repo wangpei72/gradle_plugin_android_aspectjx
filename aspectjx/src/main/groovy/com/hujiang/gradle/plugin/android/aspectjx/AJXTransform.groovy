@@ -19,24 +19,24 @@ import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.android.build.gradle.internal.pipeline.TransformTask
-import com.google.common.collect.ImmutableSet
+import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.AJXCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.procedure.*
 import org.gradle.api.Project
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-03-12
+ * @author simon* @version 1.0.0* @since 2018-03-12
  */
 class AJXTransform extends Transform {
 
-    AJXProcedure ajxProcedure
+    AJXCache ajxCache
+    Project project
 
     AJXTransform(Project proj) {
-        ajxProcedure = new AJXProcedure(proj)
+        project = proj
+        // 初始化缓存
+        ajxCache = new AJXCache(proj)
     }
 
     @Override
@@ -46,7 +46,7 @@ class AJXTransform extends Transform {
 
     @Override
     Set<QualifiedContent.ContentType> getInputTypes() {
-        return ImmutableSet.<QualifiedContent.ContentType>of(QualifiedContent.DefaultContentType.CLASSES)
+        return TransformManager.CONTENT_CLASS
     }
 
     @Override
@@ -62,31 +62,35 @@ class AJXTransform extends Transform {
 
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
-
-        Project project = ajxProcedure.project
-
+        // 每个变种都会执行
         String transformTaskVariantName = transformInvocation.context.getVariantName()
-        VariantCache variantCache = new VariantCache(ajxProcedure.project, ajxProcedure.ajxCache, transformTaskVariantName)
-        
+        long cost = System.currentTimeMillis()
+        project.logger.warn("ajx[$transformTaskVariantName] transform start...")
+        VariantCache variantCache = new VariantCache(project, ajxCache, transformTaskVariantName)
+        def ajxProcedure = new AJXProcedure(project)
+        //check enable
         ajxProcedure.with(new CheckAspectJXEnableProcedure(project, variantCache, transformInvocation))
-
-        if (transformInvocation.incremental) {
+        def incremental = transformInvocation.incremental
+        project.logger.warn("ajx[$transformTaskVariantName] incremental=${incremental}")
+        if (incremental) {
             //incremental build
-            ajxProcedure.with(new UpdateAspectFilesProcedure(project, variantCache, transformInvocation))
-            ajxProcedure.with(new UpdateInputFilesProcedure(project, variantCache, transformInvocation))
-            ajxProcedure.with(new UpdateAspectOutputProcedure(project, variantCache, transformInvocation))
+            ajxProcedure
+                    .with(new UpdateAspectFilesProcedure(project, variantCache, transformInvocation))
+                    .with(new UpdateInputFilesProcedure(project, variantCache, transformInvocation))
+                    .with(new UpdateAspectOutputProcedure(project, variantCache, transformInvocation))
         } else {
             //delete output and cache before full build
             transformInvocation.outputProvider.deleteAll()
-            variantCache.reset()
-
-            ajxProcedure.with(new CacheAspectFilesProcedure(project, variantCache, transformInvocation))
-            ajxProcedure.with(new CacheInputFilesProcedure(project, variantCache, transformInvocation))
-            ajxProcedure.with(new DoAspectWorkProcedure(project, variantCache, transformInvocation))
+            //full build
+            ajxProcedure
+                    .with(new CacheAspectFilesProcedure(project, variantCache, transformInvocation))
+                    .with(new CacheInputFilesProcedure(project, variantCache, transformInvocation))
+                    .with(new DoAspectWorkProcedure(project, variantCache, transformInvocation))
         }
 
         ajxProcedure.with(new OnFinishedProcedure(project, variantCache, transformInvocation))
 
         ajxProcedure.doWorkContinuously()
+        project.logger.warn("ajx[$transformTaskVariantName] transform finish.spend ${System.currentTimeMillis() - cost}ms")
     }
 }

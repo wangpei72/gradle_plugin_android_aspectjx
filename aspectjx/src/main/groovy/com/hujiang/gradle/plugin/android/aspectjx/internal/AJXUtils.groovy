@@ -32,9 +32,7 @@ import java.util.jar.JarFile
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-02-01
+ * @author simon* @version 1.0.0* @since 2018-02-01
  */
 class AJXUtils {
 
@@ -120,7 +118,7 @@ class AJXUtils {
         return null
     }
 
-    static String toJsonStringThrowEx(Object object) throws Exception  {
+    static String toJsonStringThrowEx(Object object) throws Exception {
         return getGson().toJson(object)
     }
 
@@ -149,12 +147,12 @@ class AJXUtils {
         transformInvocation.outputProvider.deleteAll()
 
         transformInvocation.inputs.each { TransformInput input ->
-            input.directoryInputs.each { DirectoryInput dirInput->
+            input.directoryInputs.each { DirectoryInput dirInput ->
                 File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
                 mergeJar(dirInput.file, excludeJar)
             }
 
-            input.jarInputs.each { JarInput jarInput->
+            input.jarInputs.each { JarInput jarInput ->
                 def dest = transformInvocation.outputProvider.getContentLocation(jarInput.name
                         , jarInput.contentTypes
                         , jarInput.scopes
@@ -165,15 +163,15 @@ class AJXUtils {
     }
 
     static void incrementalCopyFiles(TransformInvocation transformInvocation) {
-        transformInvocation.inputs.each {TransformInput input ->
-            input.directoryInputs.each {DirectoryInput dirInput ->
+        transformInvocation.inputs.each { TransformInput input ->
+            input.directoryInputs.each { DirectoryInput dirInput ->
                 if (dirInput.changedFiles.size() > 0) {
                     File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
                     mergeJar(dirInput.file, excludeJar)
                 }
             }
 
-            input.jarInputs.each {JarInput jarInput ->
+            input.jarInputs.each { JarInput jarInput ->
                 File target = transformInvocation.outputProvider.getContentLocation(jarInput.name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
                 switch (jarInput.status) {
                     case Status.REMOVED:
@@ -197,12 +195,12 @@ class AJXUtils {
         return isFilterMatched(str, filters, FilterPolicy.EXCLUDE)
     }
 
-    static boolean  isIncludeFilterMatched(String str, List<String> filters) {
+    static boolean isIncludeFilterMatched(String str, List<String> filters) {
         return isFilterMatched(str, filters, FilterPolicy.INCLUDE)
     }
 
     static boolean isFilterMatched(String str, List<String> filters, FilterPolicy filterPolicy) {
-        if(str == null) {
+        if (str == null) {
             return false
         }
 
@@ -239,8 +237,8 @@ class AJXUtils {
     }
 
     static enum FilterPolicy {
-        INCLUDE
-        , EXCLUDE
+        INCLUDE,
+        EXCLUDE
     }
 
     static int countOfFiles(File file) {
@@ -270,6 +268,7 @@ class AJXUtils {
                 String entryName = jarEntry.getName()
                 String tranEntryName = entryName.replace("/", ".").replace("\\", ".")
                 if (isExcludeFilterMatched(tranEntryName, excludes)) {
+                    variantCache.project.logger.warn("[ajx][$variantCache.variantName] exclude jar[$jarInput.file], match point[$tranEntryName]")
                     isExclude = true
                     break
                 }
@@ -313,7 +312,9 @@ class AJXUtils {
                 }
 
                 if (isExcludeFilterMatched(tranEntryName, excludes)) {
+                    variantCache.project.logger.warn("[ajx][$variantCache.variantName] exclude jar[$jarInput.file], match point[$tranEntryName]")
                     isExcludeMatched = true
+                    break
                 }
             }
 

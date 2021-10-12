@@ -53,7 +53,7 @@ class CacheAspectFilesProcedure extends AbsProcedure {
                     Object call() throws Exception {
                         dirInput.file.eachFileRecurse { File item ->
                             if (AJXUtils.isAspectClass(item)) {
-                                project.logger.debug("~~~~~~~~~~~~collect aspect file:${item.absolutePath}")
+                                project.logger.warn("[ajx] collect aspect file:${item.absolutePath}")
                                 String path = item.absolutePath
                                 String subPath = path.substring(dirInput.file.absolutePath.length())
                                 File cacheFile = new File(variantCache.aspectPath + subPath)
@@ -78,9 +78,9 @@ class CacheAspectFilesProcedure extends AbsProcedure {
                             String entryName = jarEntry.getName()
                             if (!jarEntry.isDirectory() && AJXUtils.isClassFile(entryName)) {
                                 byte[] bytes = ByteStreams.toByteArray(jarFile.getInputStream(jarEntry))
-                                File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
                                 if (AJXUtils.isAspectClass(bytes)) {
-                                    project.logger.debug("~~~~~~~~~~~collect aspect file:${entryName}")
+                                    project.logger.warn("[ajx] collect aspect file[${entryName}] from JAR:${jarFile}")
+                                    File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
                                     variantCache.add(bytes, cacheFile)
                                 }
                             }

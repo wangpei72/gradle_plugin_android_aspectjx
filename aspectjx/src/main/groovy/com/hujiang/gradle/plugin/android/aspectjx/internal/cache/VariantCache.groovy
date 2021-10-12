@@ -27,9 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-13
+ * @author simon* @version 1.0.0* @since 2018-04-13
  */
 class VariantCache {
 
@@ -46,8 +44,8 @@ class VariantCache {
     IncrementalStatus incrementalStatus
     Set<QualifiedContent.ContentType> includeFileContentTypes
     Set<QualifiedContent.Scope> includeFileScopes
-    Set<QualifiedContent.ContentType> contentTypes = ImmutableSet.<QualifiedContent.ContentType>of(QualifiedContent.DefaultContentType.CLASSES)
-    Set<QualifiedContent.Scope> scopes = ImmutableSet.<QualifiedContent.Scope>of(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
+    Set<QualifiedContent.ContentType> contentTypes = ImmutableSet.<QualifiedContent.ContentType> of(QualifiedContent.DefaultContentType.CLASSES)
+    Set<QualifiedContent.Scope> scopes = ImmutableSet.<QualifiedContent.Scope> of(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
 
     Map<String, JarInfo> includeJarInfos = new ConcurrentHashMap<>()
 
@@ -55,7 +53,6 @@ class VariantCache {
         this.project = proj
         this.variantName = variantName
         this.ajxCache = cache
-        this.ajxCache.put(variantName, this)
 
         incrementalStatus = new IncrementalStatus()
 
@@ -65,9 +62,9 @@ class VariantCache {
     private void init() {
         cachePath = project.buildDir.absolutePath + File.separator + AndroidProject.FD_INTERMEDIATES + "/ajx/" + variantName
         aspectPath = cachePath + File.separator + "aspecs"
-        includeFilePath = cachePath + File.separator + "includefiles"
-        excludeFilePath = cachePath + File.separator + "excludefiles"
-        includeJarConfigPath = cachePath + File.separator + "includejars.json"
+        includeFilePath = cachePath + File.separator + "includeFiles"
+        excludeFilePath = cachePath + File.separator + "excludeFiles"
+        includeJarConfigPath = cachePath + File.separator + "includeJars.json"
 
         if (!aspectDir.exists()) {
             aspectDir.mkdirs()
@@ -82,10 +79,11 @@ class VariantCache {
         }
 
         if (includeJarConfig.exists()) {
-            List<JarInfo> jarInfoList = AJXUtils.optFromJsonString(FileUtils.readFileToString(includeJarConfig), new TypeToken<List<JarInfo>>(){}.getType())
+            List<JarInfo> jarInfoList = AJXUtils.optFromJsonString(FileUtils.readFileToString(includeJarConfig),
+                    new TypeToken<List<JarInfo>>() {}.getType())
 
             if (jarInfoList != null) {
-                jarInfoList.each {JarInfo jarInfo->
+                jarInfoList.each { JarInfo jarInfo ->
                     includeJarInfos.put(jarInfo.path, jarInfo)
                 }
             }
@@ -159,7 +157,7 @@ class VariantCache {
         }
 
         List<JarInfo> jarInfoList = new ArrayList<>()
-        includeJarInfos.each {String key, JarInfo value ->
+        includeJarInfos.each { String key, JarInfo value ->
             jarInfoList.add(value)
         }
 
