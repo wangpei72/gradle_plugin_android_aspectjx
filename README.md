@@ -18,9 +18,17 @@ AspectJX
 在项目根目录的build.gradle里依赖**AspectJX**
 
 ```groovy
-dependencies {
-    // 注意这边的groupId与原作者的不一样！
-    classpath 'io.github.wurensen:gradle-android-plugin-aspectjx:2.0.11'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        // 已发布到mavenCentral仓库
+        mavenCentral()
+    }
+
+    dependencies {
+        // aspectj插件
+        classpath 'io.github.wurensen:gradle-android-plugin-aspectjx:2.0.11-SNAPSHOT'
+    }
 }
 ```
 

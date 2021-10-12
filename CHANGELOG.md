@@ -2,7 +2,7 @@
 
 > 版本号定义遵循：[语义化版本 2.0.0](https://semver.org/lang/zh-CN/)
 
-## 2.0.11 (2021-10-09)
+## 2.0.11 (2021-10-12)
 
 - 修复：多线程构建错误问题（最常见就是产生异常`java.util.zip.ZipException: zip file is empty`）
 
@@ -13,6 +13,8 @@
     > 相关issue：[305](https://github.com/HujiangTechnology/gradle_plugin_android_aspectjx/issues/305)
 
 - 修复：aspectj织入发生错误时未终止构建
+
+- 拷贝TABLESWITCH.java，修复循环i++后超过int最大值导致索引为负数的错误问题
 
 ## 更多历史版本
 
