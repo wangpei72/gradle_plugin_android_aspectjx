@@ -68,6 +68,9 @@ class CacheAspectFilesProcedure extends AbsProcedure {
 
             input.jarInputs.each { JarInput jarInput ->
 //                    collect aspect file
+                if (!jarInput.file.exists()) {
+                    return
+                }
                 batchTaskScheduler.addTask(new ITask() {
                     @Override
                     Object call() throws Exception {

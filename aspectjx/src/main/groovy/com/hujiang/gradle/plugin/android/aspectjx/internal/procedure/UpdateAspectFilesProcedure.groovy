@@ -78,6 +78,9 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
 
             input.jarInputs.each { JarInput jarInput ->
                 if (jarInput.status != Status.NOTCHANGED) {
+                    if (!jarInput.file.exists()) {
+                        return
+                    }
                     taskScheduler.addTask(new ITask() {
                         @Override
                         Object call() throws Exception {
