@@ -54,5 +54,6 @@ class AJXTaskManager {
         }
 
         batchTaskScheduler.execute()
+        batchTaskScheduler.shutDown()
     }
 }

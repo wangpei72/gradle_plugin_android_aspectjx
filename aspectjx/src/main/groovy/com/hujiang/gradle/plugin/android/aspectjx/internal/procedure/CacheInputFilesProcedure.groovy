@@ -100,6 +100,7 @@ class CacheInputFilesProcedure extends AbsProcedure {
         }
 
         taskScheduler.execute()
+        taskScheduler.shutDown()
 
         variantCache.commitIncludeJarConfig()
 

@@ -77,46 +77,50 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
             }
 
             input.jarInputs.each { JarInput jarInput ->
-                if (jarInput.status != Status.NOTCHANGED) {
-                    if (!jarInput.file.exists()) {
-                        return
-                    }
-                    taskScheduler.addTask(new ITask() {
-                        @Override
-                        Object call() throws Exception {
-                            JarFile jarFile = new JarFile(jarInput.file)
-                            Enumeration<JarEntry> entries = jarFile.entries()
-                            while (entries.hasMoreElements()) {
-                                JarEntry jarEntry = entries.nextElement()
-                                String entryName = jarEntry.getName()
-                                if (!jarEntry.isDirectory() && AJXUtils.isClassFile(entryName)) {
-                                    byte[] bytes = ByteStreams.toByteArray(jarFile.getInputStream(jarEntry))
-                                    if (AJXUtils.isAspectClass(bytes)) {
-                                        project.logger.warn("[ajx] collect aspect file[${entryName}] from JAR:${jarFile}")
-                                        File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
-                                        variantCache.incrementalStatus.isAspectChanged = true
-                                        if (jarInput.status == Status.REMOVED) {
-                                            FileUtils.deleteQuietly(cacheFile)
-                                        } else if (jarInput.status == Status.CHANGED) {
-                                            FileUtils.deleteQuietly(cacheFile)
-                                            variantCache.add(bytes, cacheFile)
-                                        } else if (jarInput.status == Status.ADDED) {
-                                            variantCache.add(bytes, cacheFile)
-                                        }
+                if (jarInput.status == Status.NOTCHANGED) {
+                    return
+                }
+                if (!jarInput.file.exists()) {
+                    project.logger.warn("[ajx] UpdateAspectFilesProcedure: jarInput[state=${jarInput.status}] not exist [${jarInput.file}]")
+                    return
+                }
+                taskScheduler.addTask(new ITask() {
+                    @Override
+                    Object call() throws Exception {
+                        JarFile jarFile = new JarFile(jarInput.file)
+                        Enumeration<JarEntry> entries = jarFile.entries()
+                        while (entries.hasMoreElements()) {
+                            JarEntry jarEntry = entries.nextElement()
+                            String entryName = jarEntry.getName()
+                            if (!jarEntry.isDirectory() && AJXUtils.isClassFile(entryName)) {
+                                byte[] bytes = ByteStreams.toByteArray(jarFile.getInputStream(jarEntry))
+                                if (AJXUtils.isAspectClass(bytes)) {
+                                    project.logger.warn("[ajx] UpdateAspectFilesProcedure:collect aspect file[${entryName}] from JAR:${jarFile}")
+                                    File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
+                                    variantCache.incrementalStatus.isAspectChanged = true
+                                    if (jarInput.status == Status.REMOVED) {
+                                        // todo 这个机制有问题，remove的jar文件不存在，无法打开，假设该jar包含aspectClass，则无法被正确删除
+                                        FileUtils.deleteQuietly(cacheFile)
+                                    } else if (jarInput.status == Status.CHANGED) {
+                                        FileUtils.deleteQuietly(cacheFile)
+                                        variantCache.add(bytes, cacheFile)
+                                    } else if (jarInput.status == Status.ADDED) {
+                                        variantCache.add(bytes, cacheFile)
                                     }
                                 }
                             }
-
-                            jarFile.close()
-
-                            return null
                         }
-                    })
-                }
+
+                        jarFile.close()
+
+                        return null
+                    }
+                })
             }
         }
 
         taskScheduler.execute()
+        taskScheduler.shutDown()
 
         if (AJXUtils.countOfFiles(variantCache.aspectDir) == 0) {
             //do work with no aspectj

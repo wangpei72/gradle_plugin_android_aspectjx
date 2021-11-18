@@ -22,10 +22,18 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.AJXCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.procedure.*
+import org.aspectj.org.eclipse.jdt.internal.compiler.batch.ClasspathJar
 import org.gradle.api.Project
 
 /**
- * class description here
+ * Aspect处理<br>
+ * 自定义transform几个问题需要注意：
+ * <ul>
+ *     <li>对于多flavor的构建，每个flavor都会执行transform</li>
+ *     <li>对于开启gradle daemon的情况（默认开启的，一般也不会去关闭），每次构建都是运行在同一个进程上，
+ *     所以要注意到有没有使用到有状态的静态或者单例，如果有的话，需要在构建结束进行处理，否则会影响到后续的构建</li>
+ *     <li>增量构建时，要注意是否需要删除之前在outputProvider下已产生的产物</li>
+ * </ul>
  * @author simon* @version 1.0.0* @since 2018-03-12
  */
 class AJXTransform extends Transform {
@@ -66,6 +74,8 @@ class AJXTransform extends Transform {
         String transformTaskVariantName = transformInvocation.context.getVariantName()
         long cost = System.currentTimeMillis()
         project.logger.warn("ajx[$transformTaskVariantName] transform start...")
+        // 之前可能是构建失败，也关闭所有打开的文件
+        ClasspathJar.closeAllOpenedArchives()
         VariantCache variantCache = new VariantCache(project, ajxCache, transformTaskVariantName)
         def ajxProcedure = new AJXProcedure(project)
         //check enable
@@ -91,6 +101,8 @@ class AJXTransform extends Transform {
         ajxProcedure.with(new OnFinishedProcedure(project, variantCache, transformInvocation))
 
         ajxProcedure.doWorkContinuously()
+        // 构建结束后关闭所有打开的文件
+        ClasspathJar.closeAllOpenedArchives()
         project.logger.warn("ajx[$transformTaskVariantName] transform finish.spend ${System.currentTimeMillis() - cost}ms")
     }
 }
