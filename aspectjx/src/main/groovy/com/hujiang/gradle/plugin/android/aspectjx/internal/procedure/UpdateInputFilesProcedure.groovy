@@ -24,9 +24,7 @@ import org.gradle.api.Project
 
 /**
  * class description here
- * @author simon
- * @version 1.0.0
- * @since 2018-04-23
+ * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class UpdateInputFilesProcedure extends AbsProcedure {
 
@@ -55,7 +53,7 @@ class UpdateInputFilesProcedure extends AbsProcedure {
                             String transPath = subPath.replace(File.separator, ".")
 
                             boolean isInclude = AJXUtils.isIncludeFilterMatched(transPath, ajxExtensionConfig.includes) \
-                                        && !AJXUtils.isExcludeFilterMatched(transPath, ajxExtensionConfig.excludes)
+                                         && !AJXUtils.isExcludeFilterMatched(transPath, ajxExtensionConfig.excludes)
 
                             if (!variantCache.incrementalStatus.isIncludeFileChanged && isInclude) {
                                 variantCache.incrementalStatus.isIncludeFileChanged = isInclude
@@ -108,40 +106,39 @@ class UpdateInputFilesProcedure extends AbsProcedure {
             }
 
             input.jarInputs.each { JarInput jarInput ->
-                if (jarInput.status != Status.NOTCHANGED) {
-                    taskScheduler.addTask(new ITask() {
-                        @Override
-                        Object call() throws Exception {
-                            project.logger.debug("~~~~~~~changed file::${jarInput.status.name()}::${jarInput.file.absolutePath}")
-
-                            String filePath = jarInput.file.absolutePath
-                            File outputJar = transformInvocation.outputProvider.getContentLocation(
-                                    jarInput.name,
-                                    jarInput.contentTypes,
-                                    jarInput.scopes,
-                                    Format.JAR)
-
-                            if (jarInput.status == Status.REMOVED) {
-                                variantCache.removeIncludeJar(filePath)
-                                FileUtils.deleteQuietly(outputJar)
-                            } else if (jarInput.status == Status.ADDED) {
-                                AJXUtils.filterJar(jarInput, variantCache, ajxExtensionConfig.includes, ajxExtensionConfig.excludes)
-                            } else if (jarInput.status == Status.CHANGED) {
-                                FileUtils.deleteQuietly(outputJar)
-                            }
-
-                            //将不需要做AOP处理的文件原样copy到输出目录
-                            if (!variantCache.isIncludeJar(filePath)) {
-                                FileUtils.copyFile(jarInput.file, outputJar)
-                            }
-                            return null
-                        }
-                    })
+                if (jarInput.status == Status.NOTCHANGED) {
+                    // 无变化，忽略
+                    return
                 }
+                taskScheduler.addTask(new ITask() {
+                    @Override
+                    Object call() throws Exception {
+                        project.logger.debug("~~~~~~~changed file::${jarInput.status.name()}::${jarInput.file.absolutePath}")
+
+                        String filePath = jarInput.file.absolutePath
+                        File outputJar = transformInvocation.outputProvider.getContentLocation(
+                                jarInput.name,
+                                jarInput.contentTypes,
+                                jarInput.scopes,
+                                Format.JAR)
+
+                        if (jarInput.status == Status.REMOVED) {
+                            variantCache.removeIncludeJar(filePath)
+                            FileUtils.deleteQuietly(outputJar)
+                        } else if (jarInput.status == Status.ADDED) {
+                            AJXUtils.filterJar(jarInput, variantCache, ajxExtensionConfig.includes, ajxExtensionConfig.excludes)
+                        } else if (jarInput.status == Status.CHANGED) {
+                            FileUtils.deleteQuietly(outputJar)
+                        }
+
+                        return null
+                    }
+                })
             }
         }
 
         taskScheduler.execute()
+        taskScheduler.shutDown()
 
         variantCache.commitIncludeJarConfig()
 

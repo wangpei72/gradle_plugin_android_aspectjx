@@ -98,6 +98,7 @@ class CacheAspectFilesProcedure extends AbsProcedure {
         }
 
         batchTaskScheduler.execute()
+        batchTaskScheduler.shutDown()
 
         if (AJXUtils.countOfFiles(variantCache.aspectDir) == 0) {
             AJXUtils.doWorkWithNoAspectj(transformInvocation)

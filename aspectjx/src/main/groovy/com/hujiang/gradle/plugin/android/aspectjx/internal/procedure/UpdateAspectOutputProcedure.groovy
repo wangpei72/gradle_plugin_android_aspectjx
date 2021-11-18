@@ -72,6 +72,10 @@ class UpdateAspectOutputProcedure extends AbsProcedure {
 
         transformInvocation.inputs.each { TransformInput input ->
             input.jarInputs.each { JarInput jarInput ->
+                if (!jarInput.file.exists()) {
+                    // 文件不存在，忽略处理
+                    return
+                }
                 ajxTaskManager.classPath << jarInput.file
                 File outputJar = transformInvocation.getOutputProvider().getContentLocation(
                         jarInput.name,
@@ -96,6 +100,9 @@ class UpdateAspectOutputProcedure extends AbsProcedure {
 
                         ajxTaskManager.addTask(jarTask)
                     }
+                } else {
+                    // 将不需要做AOP处理的文件原样copy到输出目录
+                    FileUtils.copyFile(jarInput.file, outputJar)
                 }
             }
         }

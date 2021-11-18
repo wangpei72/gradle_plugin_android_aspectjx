@@ -51,4 +51,7 @@ class BatchTaskScheduler {
         tasks.clear()
     }
 
+    void shutDown() {
+        executorService.shutdown()
+    }
 }
