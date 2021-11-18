@@ -70,7 +70,7 @@ public class ClasspathJar extends ClasspathLocation {
 	 */
 	private static int maxOpenArchives = 1000;
 	private final static int MAXOPEN_DEFAULT = 1000;
-	private static List openArchives = new ArrayList();
+	private static List<ZipFile> openArchives = new ArrayList();
 	// End AspectJ Extension
 
 	protected File file;
@@ -403,19 +403,20 @@ public class ClasspathJar extends ClasspathLocation {
 //			closeSomeArchives(openArchives.size()/10); // Close 10% of those open
 //		}
 		zipFile = new ZipFile(file);
-//		openArchives.add(this);
+		openArchives.add(zipFile);
 	}
 
 	private void closeSomeArchives(int n) {
-		for (int i=n-1;i>=0;i--) {
-			ClasspathJar zf = (ClasspathJar)openArchives.get(0);
-			zf.close();
-		}
+//		for (int i=n-1;i>=0;i--) {
+//			ClasspathJar zf = (ClasspathJar)openArchives.get(0);
+//			zf.close();
+//		}
 	}
 
 	public void close() {
 		if (zipFile == null) return;
 		try {
+		    // 这边注释掉关闭，多线程下可能还有其它线程访问到该文件，等最后统一关闭
 //			openArchives.remove(this);
 //			zipFile.close();
 //		} catch (IOException ioe) {
@@ -435,4 +436,24 @@ public class ClasspathJar extends ClasspathLocation {
 	}
 
 // End AspectJ Extension
+
+    // 重写文件拓展的内容
+    // 关闭所有打开的jar文件
+    public static void closeAllOpenedArchives() {
+		long cost = System.currentTimeMillis();
+		int count = 0;
+        for (ZipFile openArchive : openArchives) {
+            try {
+				if (openArchive != null) {
+					count++;
+					openArchive.close();
+				}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        cost = System.currentTimeMillis() - cost;
+        System.out.println("[ajx] close all open jar files: count=" + count + ",cost=" + cost + "ms");
+        openArchives.clear();
+    }
 }
