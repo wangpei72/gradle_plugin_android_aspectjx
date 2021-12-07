@@ -98,7 +98,7 @@ class AJXTask implements ITask {
         }
 
         inPath.each { File file ->
-            project.logger.debug("~~~~~~~~~~~~~input file: ${file.absolutePath}")
+            log.debug("~~~~~~~~~~~~~input file: ${file.absolutePath}")
         }
 
         MessageHandler handler = new MessageHandler(true)
