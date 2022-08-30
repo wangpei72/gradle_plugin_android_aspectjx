@@ -5,7 +5,7 @@ AspectJX
 
 > [原作者说明文档](./README-old.md) 
 
-## 最新版本（2.0.14）
+## 最新版本（2.0.15）
 
 [查看完整版本日志](CHANGELOG.md)
 
@@ -81,8 +81,8 @@ aspectjx {
 
 | 使用依赖 | 适配版本 |
 | - | - |
-| Android Gradle Plugin | 3.6.1（最低版本1.5） |
-| Gradle | 6.3 |
+| Android Gradle Plugin | 4.1.3（最低版本1.5） |
+| Gradle | 6.5 |
 | org.aspectj:aspectjtools | 1.9.6 |
 
 > **AspectJX**是基于 gradle android插件1.5及以上版本设计使用的，如果你还在用1.3或者更低版本，请把版本升上去。
@@ -103,7 +103,7 @@ aspectjx {
 ## License
 
 ```txt
-Copyright 2021 LanceWu
+Copyright 2022 LanceWu
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

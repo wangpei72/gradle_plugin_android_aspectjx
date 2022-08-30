@@ -73,7 +73,7 @@ class AJXCache {
             def isExtensionChanged = ajxCache.isExtensionChanged(ajxExtension)
             project.logger.warn("[ajx] isExtensionChanged=" + isExtensionChanged)
             if (isExtensionChanged) {
-                project.logger.warn("[ajx] cache changed, clean before preBuild")
+                project.logger.warn("[ajx] cache changed, clean '$project.name' before preBuild")
                 project.tasks.findByName('preBuild').dependsOn(project.tasks.findByName("clean"))
             }
 
@@ -157,6 +157,10 @@ class AJXCache {
 
     boolean isExtensionChanged(AJXExtension extension) {
         if (extension == null) {
+            return true
+        }
+
+        if (extension.enabled != ajxExtensionConfig.enabled) {
             return true
         }
 

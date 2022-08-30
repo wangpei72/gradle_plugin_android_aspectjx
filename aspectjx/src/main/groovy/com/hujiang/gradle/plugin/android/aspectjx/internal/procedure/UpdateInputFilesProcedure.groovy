@@ -38,6 +38,7 @@ class UpdateInputFilesProcedure extends AbsProcedure {
         BatchTaskScheduler taskScheduler = new BatchTaskScheduler()
 
         transformInvocation.inputs.each { TransformInput input ->
+            // class文件处理
             input.directoryInputs.each { DirectoryInput dirInput ->
                 taskScheduler.addTask(new ITask() {
                     @Override
@@ -45,15 +46,12 @@ class UpdateInputFilesProcedure extends AbsProcedure {
                         dirInput.changedFiles.each { File file, Status status ->
                             project.logger.debug("~~~~~~~~~~~~~~~~changed file::${status.name()}::${file.absolutePath}")
 
-                            variantCache.includeFileContentTypes = dirInput.contentTypes
-                            variantCache.includeFileScopes = dirInput.scopes
-
                             String path = file.absolutePath
                             String subPath = path.substring(dirInput.file.absolutePath.length())
                             String transPath = subPath.replace(File.separator, ".")
 
                             boolean isInclude = AJXUtils.isIncludeFilterMatched(transPath, ajxExtensionConfig.includes) \
-                                         && !AJXUtils.isExcludeFilterMatched(transPath, ajxExtensionConfig.excludes)
+                                             && !AJXUtils.isExcludeFilterMatched(transPath, ajxExtensionConfig.excludes)
 
                             if (!variantCache.incrementalStatus.isIncludeFileChanged && isInclude) {
                                 variantCache.incrementalStatus.isIncludeFileChanged = isInclude
@@ -79,29 +77,9 @@ class UpdateInputFilesProcedure extends AbsProcedure {
                                     break
                             }
                         }
-                        //如果include files 发生变化，则删除include输出jar
-                        if (variantCache.incrementalStatus.isIncludeFileChanged) {
-                            File includeOutputJar = transformInvocation.outputProvider.getContentLocation(
-                                    "include",
-                                    variantCache.contentTypes,
-                                    variantCache.scopes,
-                                    Format.JAR)
-                            FileUtils.deleteQuietly(includeOutputJar)
-                        }
-
-                        //如果exclude files发生变化，则重新生成exclude jar到输出目录
-                        if (variantCache.incrementalStatus.isExcludeFileChanged) {
-                            File excludeOutputJar = transformInvocation.outputProvider.getContentLocation(
-                                    "exclude",
-                                    variantCache.contentTypes,
-                                    variantCache.scopes,
-                                    Format.JAR)
-                            FileUtils.deleteQuietly(excludeOutputJar)
-                            AJXUtils.mergeJar(variantCache.excludeFileDir, excludeOutputJar)
-                        }
-
                         return null
                     }
+
                 })
             }
 
@@ -139,6 +117,27 @@ class UpdateInputFilesProcedure extends AbsProcedure {
 
         taskScheduler.execute()
         taskScheduler.shutDown()
+
+        //如果include files 发生变化，则删除include输出jar
+        if (variantCache.incrementalStatus.isIncludeFileChanged) {
+            File includeOutputJar = transformInvocation.outputProvider.getContentLocation(
+                    "include",
+                    variantCache.contentTypes,
+                    variantCache.scopes,
+                    Format.JAR)
+            FileUtils.deleteQuietly(includeOutputJar)
+        }
+
+        //如果exclude files发生变化，则重新生成exclude jar到输出目录
+        if (variantCache.incrementalStatus.isExcludeFileChanged) {
+            File excludeOutputJar = transformInvocation.outputProvider.getContentLocation(
+                    "exclude",
+                    variantCache.contentTypes,
+                    variantCache.scopes,
+                    Format.JAR)
+            FileUtils.deleteQuietly(excludeOutputJar)
+            AJXUtils.mergeJar(variantCache.excludeFileDir, excludeOutputJar)
+        }
 
         variantCache.commitIncludeJarConfig()
 
