@@ -16,6 +16,7 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal
 
 import com.android.SdkConstants
 import com.android.build.api.transform.*
+import com.google.common.collect.ImmutableSet
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
@@ -146,31 +147,63 @@ class AJXUtils {
     static void fullCopyFiles(TransformInvocation transformInvocation) {
         transformInvocation.outputProvider.deleteAll()
 
+        // kotlin java会分别生成在不同目录，所以会执行多次
+        List<File> directoryInputFiles = new ArrayList<>()
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput dirInput ->
-                File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
-                mergeJar(dirInput.file, excludeJar)
+                directoryInputFiles.add(dirInput.file)
             }
+        }
+        if (!directoryInputFiles.isEmpty()) {
+            Set<QualifiedContent.ContentType> contentTypes = ImmutableSet.<QualifiedContent.ContentType> of(QualifiedContent.DefaultContentType.CLASSES)
+            Set<QualifiedContent.Scope> scopes = ImmutableSet.<QualifiedContent.Scope> of(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
+            File excludeJar = transformInvocation.getOutputProvider().getContentLocation(
+                    "exclude",
+                    contentTypes,
+                    scopes,
+                    Format.JAR
+            )
+            mergeJar(directoryInputFiles, excludeJar)
+        }
 
+        transformInvocation.inputs.each { TransformInput input ->
             input.jarInputs.each { JarInput jarInput ->
-                def dest = transformInvocation.outputProvider.getContentLocation(jarInput.name
-                        , jarInput.contentTypes
-                        , jarInput.scopes
-                        , Format.JAR)
+                def dest = transformInvocation.outputProvider.getContentLocation(
+                        jarInput.name,
+                        jarInput.contentTypes,
+                        jarInput.scopes,
+                        Format.JAR
+                )
                 FileUtils.copyFile(jarInput.file, dest)
             }
         }
     }
 
     static void incrementalCopyFiles(TransformInvocation transformInvocation) {
+        // kotlin java会分别生成在不同目录，所以会执行多次
+        List<File> directoryInputFiles = new ArrayList<>()
+        boolean hasChanged = false
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput dirInput ->
+                directoryInputFiles.add(dirInput.file)
                 if (dirInput.changedFiles.size() > 0) {
-                    File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
-                    mergeJar(dirInput.file, excludeJar)
+                    hasChanged = true
                 }
             }
+        }
+        if (hasChanged) {
+            Set<QualifiedContent.ContentType> contentTypes = ImmutableSet.<QualifiedContent.ContentType> of(QualifiedContent.DefaultContentType.CLASSES)
+            Set<QualifiedContent.Scope> scopes = ImmutableSet.<QualifiedContent.Scope> of(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
+            File excludeJar = transformInvocation.getOutputProvider().getContentLocation(
+                    "exclude",
+                    contentTypes,
+                    scopes,
+                    Format.JAR
+            )
+            mergeJar(directoryInputFiles, excludeJar)
+        }
 
+        transformInvocation.inputs.each { TransformInput input ->
             input.jarInputs.each { JarInput jarInput ->
                 File target = transformInvocation.outputProvider.getContentLocation(jarInput.name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
                 switch (jarInput.status) {
@@ -328,8 +361,12 @@ class AJXUtils {
     }
 
     static void mergeJar(File sourceDir, File targetJar) {
-        if (sourceDir == null) {
-            throw new IllegalArgumentException("sourceDir should not be null")
+        mergeJar([sourceDir], targetJar)
+    }
+
+    static void mergeJar(List<File> sourceDirList, File targetJar) {
+        if (sourceDirList == null) {
+            throw new IllegalArgumentException("sourceDirList should not be null")
         }
 
         if (targetJar == null) {
@@ -351,9 +388,11 @@ class AJXUtils {
                 }
             })
 
-            jarMerger.addFolder(sourceDir)
+            sourceDirList.forEach {
+                jarMerger.addFolder(it)
+            }
         } catch (Exception e) {
-            LoggerFactory.getLogger(AJXPlugin).warn("mergeJar(${sourceDir}, ${targetJar}", e)
+            LoggerFactory.getLogger(AJXPlugin).warn("mergeJar(${sourceDirList}, ${targetJar}", e)
         } finally {
             jarMerger.close()
         }

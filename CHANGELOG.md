@@ -1,6 +1,29 @@
 # Change Log
 
-> 版本号定义遵循：[语义化版本 2.0.0](https://semver.org/lang/zh-CN/)
+版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
+
+## [2.0.15] - 2022-08-30
+### Added
+
+- 修改plugin引入相关逻辑，支持通过plugins方式引入（未发布到gradle插件仓库，仍然需要通过指定classpath的方式获取插件）
+
+- 支持所有Android Plugin，包括：
+
+  ```groovy
+  'com.android.application',
+  'com.android.feature',
+  'com.android.dynamic-feature',
+  'com.android.library',
+  'android',
+  'android-library'
+  ```
+### Changed
+
+- AGP版本变更为4.1.3，gradle版本变更为6.5
+
+### Fixed
+
+- 修复：Kotlin项目禁用插件或不需要进行任何织入时，会发送类丢失的问题（[#26](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/26)）
 
 ## 2.0.14 (2021-12-07)
 
@@ -20,11 +43,11 @@
 
 - 修复：多线程构建错误问题（最常见就是产生异常`java.util.zip.ZipException: zip file is empty`）
 
-    > 相关issue：[324](https://github.com/HujiangTechnology/gradle_plugin_android_aspectjx/issues/324)、[327](https://github.com/HujiangTechnology/gradle_plugin_android_aspectjx/issues/327)
+    > 相关issue：[#324](https://github.com/HujiangTechnology/gradle_plugin_android_aspectjx/issues/324)、[#327](https://github.com/HujiangTechnology/gradle_plugin_android_aspectjx/issues/327)
 
 - 修复：多变种构建时间随着变种数量增多暴涨问题
 
-    > 相关issue：[305](https://github.com/HujiangTechnology/gradle_plugin_android_aspectjx/issues/305)
+    > 相关issue：[#305](https://github.com/HujiangTechnology/gradle_plugin_android_aspectjx/issues/305)
 
 - 修复：aspectj织入发生错误时未终止构建
 

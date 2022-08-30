@@ -36,8 +36,6 @@ publishing {
                     }
                 }
                 scm {
-                    connection = SCM_CONNECTION
-                    developerConnection = SCM_DEV_CONNECTION
                     url = SCM_URL
                 }
             }

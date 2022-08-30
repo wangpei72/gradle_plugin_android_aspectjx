@@ -42,8 +42,6 @@ class VariantCache {
     String includeJarConfigPath
 
     IncrementalStatus incrementalStatus
-    Set<QualifiedContent.ContentType> includeFileContentTypes
-    Set<QualifiedContent.Scope> includeFileScopes
     Set<QualifiedContent.ContentType> contentTypes = ImmutableSet.<QualifiedContent.ContentType> of(QualifiedContent.DefaultContentType.CLASSES)
     Set<QualifiedContent.Scope> scopes = ImmutableSet.<QualifiedContent.Scope> of(QualifiedContent.Scope.EXTERNAL_LIBRARIES)
 

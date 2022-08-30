@@ -41,6 +41,7 @@ class AJXProcedure extends AbsProcedure {
     boolean doWorkContinuously() {
         for (AbsProcedure procedure : procedures) {
             if (!procedure.doWorkContinuously()) {
+                project.logger.warn("ajx[$procedure] break")
                 break
             }
         }
