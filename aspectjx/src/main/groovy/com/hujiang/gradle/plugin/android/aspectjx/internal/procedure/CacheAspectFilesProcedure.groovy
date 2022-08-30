@@ -102,6 +102,7 @@ class CacheAspectFilesProcedure extends AbsProcedure {
 
         if (AJXUtils.countOfFiles(variantCache.aspectDir) == 0) {
             AJXUtils.doWorkWithNoAspectj(transformInvocation)
+            variantCache.ajxCache.commit()
             return false
         }
 

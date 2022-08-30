@@ -45,9 +45,6 @@ class CacheInputFilesProcedure extends AbsProcedure {
 
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput dirInput ->
-                variantCache.includeFileContentTypes = dirInput.contentTypes
-                variantCache.includeFileScopes = dirInput.scopes
-
                 taskScheduler.addTask(new ITask() {
                     @Override
                     Object call() throws Exception {
@@ -61,16 +58,6 @@ class CacheInputFilesProcedure extends AbsProcedure {
                                         !AJXUtils.isExcludeFilterMatched(transPath, ajxExtensionConfig.excludes)
                                 variantCache.add(item, new File((isInclude ? variantCache.includeFilePath : variantCache.excludeFilePath) + subPath))
                             }
-                        }
-
-                        //put exclude files into jar
-                        if (AJXUtils.countOfFiles(variantCache.excludeFileDir) > 0) {
-                            File excludeJar = transformInvocation.getOutputProvider().getContentLocation(
-                                    "exclude",
-                                    variantCache.contentTypes,
-                                    variantCache.scopes,
-                                    Format.JAR)
-                            AJXUtils.mergeJar(variantCache.excludeFileDir, excludeJar)
                         }
 
                         return null
@@ -101,6 +88,17 @@ class CacheInputFilesProcedure extends AbsProcedure {
 
         taskScheduler.execute()
         taskScheduler.shutDown()
+
+        //put exclude files into jar
+        if (AJXUtils.countOfFiles(variantCache.excludeFileDir) > 0) {
+            File excludeJar = transformInvocation.getOutputProvider().getContentLocation(
+                    "exclude",
+                    variantCache.contentTypes,
+                    variantCache.scopes,
+                    Format.JAR)
+            FileUtils.deleteQuietly(targetJar)
+            AJXUtils.mergeJar(variantCache.excludeFileDir, excludeJar)
+        }
 
         variantCache.commitIncludeJarConfig()
 
