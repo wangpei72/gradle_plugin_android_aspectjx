@@ -96,7 +96,7 @@ class CacheInputFilesProcedure extends AbsProcedure {
                     variantCache.contentTypes,
                     variantCache.scopes,
                     Format.JAR)
-            FileUtils.deleteQuietly(targetJar)
+            FileUtils.deleteQuietly(excludeJar)
             AJXUtils.mergeJar(variantCache.excludeFileDir, excludeJar)
         }
 
