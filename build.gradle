@@ -1,27 +1,3 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        google()
-    }
-}
-
-allprojects {
-    buildscript {
-        repositories {
-            mavenLocal()
-            google()
-        }
-    }
-
-    dependencies {
-        repositories {
-            mavenLocal()
-            google()
-        }
-    }
-
-}
-
 // load local.properties
 Properties properties = new Properties()
 if (project.file('local.properties').exists()) {

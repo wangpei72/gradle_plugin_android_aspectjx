@@ -5,7 +5,7 @@ AspectJX
 
 > [原作者说明文档](./README-old.md) 
 
-## 最新版本（2.0.16）
+## 最新版本（3.0.0）
 
 [查看完整版本日志](CHANGELOG.md)
 
@@ -13,7 +13,9 @@ AspectJX
 
 ## 如何使用
 
-* **插件引用**
+### 插件引用
+
+**方式一：`apply`方式**
 
 在项目根目录的build.gradle里依赖**AspectJX**
 
@@ -32,15 +34,32 @@ buildscript {
 }
 ```
 
-* **在app项目的build.gradle里应用插件**
+在app项目的build.gradle里应用插件：
 
 ```groovy
+// 3.0.0开始，id已变更：
+apply plugin: 'io.github.wurensen.android-aspectjx'
+
+// 3.0.0以下：
 apply plugin: 'android-aspectjx'
 //或者这样也可以
 apply plugin: 'com.hujiang.android-aspectjx'
 ```
 
-* **AspectJX配置**
+> 注意：为了保持plugins方式引入和apply plugin方式引入id一致，所以插件id已变更。
+
+**方式二：`plugins`方式**
+
+```groovy
+plugins {
+  // 3.0.0版本开始支持直接从gradlePluginPortal仓库拉取
+  id "io.github.wurensen.android-aspectjx" version "version"
+}
+```
+
+> 对于3.0.0以下版本想采用plugins方式，请用旧版本id，并且自定义拉取策略：[配置方式](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/27)
+
+### AspectJX配置
 
 **AspectJX**默认会处理所有的二进制代码文件和库，为了提升编译效率及规避部分第三方库出现的编译兼容性问题，**AspectJX**提供`include`、`exclude`命令来过滤需要处理的文件及排除某些文件(包括class文件及jar文件)。
 
@@ -79,24 +98,36 @@ aspectjx {
 
 ## 适配情况
 
-| 使用依赖 | 适配版本 |
-| - | - |
-| Android Gradle Plugin | 4.1.3（最低版本1.5） |
-| Gradle | 6.5 |
-| org.aspectj:aspectjtools | 1.9.6 |
+| 使用依赖 | 适配版本 | 兼容版本 |
+| :-- | - | --- |
+| Android Gradle Plugin | 7.2.2 | 4.1.3 |
+| Gradle | 7.3.3 | 6.5 |
+| org.aspectj:aspectjtools | 1.9.6 | 1.9.6 |
 
-> **AspectJX**是基于 gradle android插件1.5及以上版本设计使用的，如果你还在用1.3或者更低版本，请把版本升上去。
-
+> 适配AGP最新大版本和兼容上一个大版本
 
 ## 常见问题
 
-* 问：**AspectJX**是否支持`*.aj`文件的编译?
+- 问：**AspectJX**是否支持`*.aj`文件的编译?
 
-答：不支持。目前**AspectJX**仅支持annotation的方式，具体可以参考[支持kotlin代码织入的AspectJ Demo](https://github.com/HujiangTechnology/AspectJ-Demo)
+  答：不支持。目前**AspectJX**仅支持annotation的方式，具体可以参考[支持kotlin代码织入的AspectJ Demo](https://github.com/HujiangTechnology/AspectJ-Demo)
 
-* 问：编译时会出现`can't determine superclass of missing type**`及其他编译错误怎么办？
+- 问：编译时会出现`can't determine superclass of missing type**`及其他编译错误怎么办？
 
-答：大部分情况下把出现问题相关的class文件或者库（jar文件）过滤掉就可以搞定了
+  答：大部分情况下把出现问题相关的class文件或者库（jar文件）过滤掉就可以搞定了
+
+- 问：项目使用kotlin或kotlin协程，发生织入错误？
+
+  答：请按以下方式exclude掉kotlin库
+
+  ```groovy
+  aspectjx {
+      enabled = false
+      // 移除kotlin相关，编译错误和提升速度
+      exclude 'kotlin.jvm', 'kotlin.internal'
+      exclude 'kotlinx.coroutines.internal', 'kotlinx.coroutines.android'
+  }
+  ```
 
 > 有任何问题可以提[Issues](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues)或者[discussions](https://github.com/wurensen/gradle_plugin_android_aspectjx/discussions)
 
