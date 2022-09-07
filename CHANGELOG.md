@@ -2,7 +2,22 @@
 
 版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
 
+## [3.0.0] - 2022-09-07
+
+### Added
+
+- 所有插件代码采用Kotlin重写，以便编译器发现代码语法错误
+
+- 适配AGP和Gradle版本：AGP-7.2.2、Gradle-7.3.3（[#23](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/23)）
+- 插件同步发布到gradle官方仓库：[gradlePluginPortal](https://plugins.gradle.org/plugin/io.github.wurensen.android-aspectjx)，支持plugins方式直接拉取（[#27](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/27)）
+- 增加app module用于测试
+
+### Changed
+
+- 插件id已修改为`io.github.wurensen.android-aspectjx`，旧插件id已移除
+
 ## [2.0.16] - 2022-09-06
+
 ### Fixed
 - 修复：增量构建路径下构建失败的问题（[#28](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/28)）
 

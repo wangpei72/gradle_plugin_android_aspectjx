@@ -1,1 +1,34 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            println "requested:$requested"
+            switch (requested.id.id) {
+                // agp不是所有版本都能通过plugins方式拉取到，统一采用classpath方式拉取
+                case "com.android.application":
+                    def agpModule = "com.android.tools.build:gradle:${requested.version}"
+                    useModule(agpModule)
+                    break
+                // 插件审核中，自定义拉取
+                case "io.github.wurensen.android-aspectjx":
+                    def agpModule = "io.github.wurensen:gradle-android-plugin-aspectjx:${requested.version}"
+                    useModule(agpModule)
+                    break
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
 include ':aspectjx'
+include ':app'
