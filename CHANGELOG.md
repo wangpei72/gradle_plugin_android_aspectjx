@@ -2,6 +2,12 @@
 
 版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
 
+## [3.1.0] - 2022-09-13
+
+### Added
+
+- 支持gradle的Configuration Cache（gradle>=7.5）（[#32](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/32)）
+
 ## [3.0.0] - 2022-09-07
 
 ### Added
