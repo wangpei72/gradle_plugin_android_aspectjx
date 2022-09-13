@@ -14,19 +14,19 @@
  */
 package com.hujiang.gradle.plugin.android.aspectjx.internal
 
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.ITask
 import org.aspectj.bridge.IMessage
 import org.aspectj.bridge.MessageHandler
 import org.aspectj.tools.ajc.Main
 import org.gradle.api.GradleException
-import org.gradle.api.Project
 import java.io.File
 
 /**
  * class description here
  * @author simon* @version 1.0.0* @since 2018-03-14
  */
-class AJXTask(val project: Project) : ITask {
+class AJXTask : ITask {
 
     var encoding: String = ""
     var inPath = mutableListOf<File>()
@@ -49,7 +49,6 @@ class AJXTask(val project: Project) : ITask {
         classpath 的作用是在当解析一个类的时候，当这个类是不在inpath 中，会从classpath 中寻找。
         在使用AspectJ的时候, 我们用以下几个方面来优化我们的速度。
         * */
-        val log = project.logger
         val args = mutableListOf(
             "-showWeaveInfo",
             "-encoding", encoding,
@@ -93,7 +92,7 @@ class AJXTask(val project: Project) : ITask {
         }
 
         inPath.forEach {
-            log.debug("~~~~~~~~~~~~~input file: ${it.absolutePath}")
+            LoggerHolder.logger.debug("~~~~~~~~~~~~~input file: ${it.absolutePath}")
         }
 
         val handler = MessageHandler(true)
@@ -105,13 +104,13 @@ class AJXTask(val project: Project) : ITask {
                     throw GradleException(message.message, message.thrown)
                 }
                 IMessage.WARNING -> {
-                    log.warn(message.message, message.thrown)
+                    LoggerHolder.logger.warn(message.message, message.thrown)
                 }
                 IMessage.INFO -> {
-                    log.info(message.message, message.thrown)
+                    LoggerHolder.logger.info(message.message, message.thrown)
                 }
                 IMessage.DEBUG -> {
-                    log.debug(message.message, message.thrown)
+                    LoggerHolder.logger.debug(message.message, message.thrown)
                 }
                 else -> {}
             }

@@ -16,6 +16,7 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXTask
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXTaskManager
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
@@ -27,10 +28,9 @@ import org.gradle.api.Project
  * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class DoAspectWorkProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     private val ajxTaskManager: AJXTaskManager
 
@@ -47,13 +47,13 @@ class DoAspectWorkProcedure(
 
     override fun doWorkContinuously(): Boolean {
         //do aspectj real work
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~do aspectj real work")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~do aspectj real work")
         ajxTaskManager.aspectPath.add(variantCache.getAspectDir())
         ajxTaskManager.classPath.add(variantCache.getIncludeFileDir())
         ajxTaskManager.classPath.add(variantCache.getExcludeFileDir())
 
         //process class files
-        val ajxTask = AJXTask(project)
+        val ajxTask = AJXTask()
         val includeJar = transformInvocation.outputProvider.getContentLocation(
             "include",
             variantCache.contentTypes,
@@ -77,7 +77,7 @@ class DoAspectWorkProcedure(
                 ajxTaskManager.classPath.add(jarInput.file)
 
                 if (variantCache.isIncludeJar(jarInput.file.absolutePath)) {
-                    val jarTask = AJXTask(project)
+                    val jarTask = AJXTask()
                     jarTask.inPath.add(jarInput.file)
 
                     val outputJar = transformInvocation.outputProvider.getContentLocation(

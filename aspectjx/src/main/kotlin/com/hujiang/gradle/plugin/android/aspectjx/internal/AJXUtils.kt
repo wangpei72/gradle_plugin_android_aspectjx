@@ -20,6 +20,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.hujiang.gradle.plugin.android.aspectjx.AJXPlugin
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import org.apache.commons.io.FileUtils
 import org.objectweb.asm.ClassReader
@@ -317,7 +318,7 @@ object AJXUtils {
                 val entryName = jarEntry.name
                 val tranEntryName = entryName.replace("/", ".").replace("\\", ".")
                 if (isExcludeFilterMatched(tranEntryName, excludes)) {
-                    variantCache.project.logger.warn("[ajx][${variantCache.variantName}] exclude jar[${jarInput.file}], match point[$tranEntryName]")
+                    LoggerHolder.logger.warn("[ajx][${variantCache.variantName}] exclude jar[${jarInput.file}], match point[$tranEntryName]")
                     isExclude = true
                     break
                 }
@@ -361,7 +362,7 @@ object AJXUtils {
                 }
 
                 if (isExcludeFilterMatched(tranEntryName, excludes)) {
-                    variantCache.project.logger.warn("[ajx][${variantCache.variantName}] exclude jar[${jarInput.file}], match point[$tranEntryName]")
+                    LoggerHolder.logger.warn("[ajx][${variantCache.variantName}] exclude jar[${jarInput.file}], match point[$tranEntryName]")
                     isExcludeMatched = true
                     break
                 }

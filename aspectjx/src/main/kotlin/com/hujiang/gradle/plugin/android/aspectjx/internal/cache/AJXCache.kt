@@ -16,6 +16,7 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.cache
 
 import com.hujiang.gradle.plugin.android.aspectjx.AJXConfig
 import com.hujiang.gradle.plugin.android.aspectjx.AJXExtension
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.compat.AgpApiCompat
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.model.AJXExtensionConfig
@@ -28,10 +29,11 @@ import java.io.File
  * class description here
  * @author simon* @version 1.0.0* @since 2018-04-03
  */
-class AJXCache(val project: Project) {
+class AJXCache(project: Project) {
 
     private lateinit var cachePath: String
     private lateinit var extensionConfigPath: String
+    val buildDir: File = project.buildDir
 
     var ajxExtensionConfig = AJXExtensionConfig()
 
@@ -58,17 +60,17 @@ class AJXCache(val project: Project) {
             }
             ajxCache.bootClassPath =
                 configuration.getBootClasspath().joinToString(separator = File.pathSeparator)
-            project.logger.warn("[ajx] bootClassPath=${bootClassPath}")
+            LoggerHolder.logger.warn("[ajx] bootClassPath=${bootClassPath}")
 
             val ajxExtension =
                 project.extensions.findByType(AJXExtension::class.java) ?: AJXExtension()
-            project.logger.warn("[ajx] project.aspectjx=${ajxExtension}")
+            LoggerHolder.logger.warn("[ajx] project.aspectjx=${ajxExtension}")
 
             //当过滤条件发生变化，clean掉编译缓存
             val isExtensionChanged = ajxCache.isExtensionChanged(ajxExtension)
-            project.logger.warn("[ajx] isExtensionChanged=$isExtensionChanged")
+            LoggerHolder.logger.warn("[ajx] isExtensionChanged=$isExtensionChanged")
             if (isExtensionChanged) {
-                project.logger.warn("[ajx] cache changed, clean '${project.name}' before preBuild")
+                LoggerHolder.logger.warn("[ajx] cache changed, clean '${project.name}' before preBuild")
                 project.tasks.findByName("preBuild")?.dependsOn(project.tasks.findByName("clean"))
             }
             // 更新配置
@@ -89,8 +91,7 @@ class AJXCache(val project: Project) {
     }
 
     private fun init() {
-        cachePath =
-            project.buildDir.absolutePath + File.separator + AgpApiCompat.FD_INTERMEDIATES + "/ajx"
+        cachePath = buildDir.absolutePath + File.separator + AgpApiCompat.FD_INTERMEDIATES + "/ajx"
         extensionConfigPath = cachePath + File.separator + "extensionConfig.json"
         val cacheDir = getCacheDir()
         if (!cacheDir.exists()) {
@@ -122,7 +123,7 @@ class AJXCache(val project: Project) {
 
     fun commit() {
         val extensionConfigFile = getExtensionConfigFile()
-        project.logger.debug("putExtensionConfig:${extensionConfigFile}")
+        LoggerHolder.logger.debug("putExtensionConfig:${extensionConfigFile}")
 
         FileUtils.deleteQuietly(extensionConfigFile)
 
@@ -136,7 +137,7 @@ class AJXCache(val project: Project) {
         }
 
         val jsonString = AJXUtils.optToJsonString(ajxExtensionConfig)
-        project.logger.debug(jsonString)
+        LoggerHolder.logger.debug(jsonString)
         FileUtils.write(extensionConfigFile, jsonString, "UTF-8")
     }
 

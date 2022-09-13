@@ -16,18 +16,17 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
-import org.gradle.api.Project
 
 /**
  * class description here
  * @author simon* @version 1.0.0* @since 2018-04-20
  */
 class AJXProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     private val procedures = mutableListOf<AbsProcedure>()
 
@@ -40,7 +39,7 @@ class AJXProcedure(
     override fun doWorkContinuously(): Boolean {
         for (procedure in procedures) {
             if (!procedure.doWorkContinuously()) {
-                project.logger.warn("ajx[$procedure] break")
+                LoggerHolder.logger.warn("ajx[$procedure] break")
                 break
             }
         }

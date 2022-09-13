@@ -17,6 +17,7 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.BatchTaskScheduler
@@ -31,10 +32,9 @@ import java.io.File
  * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class CacheInputFilesProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     override fun doWorkContinuously(): Boolean {
         //过滤规则
@@ -43,7 +43,7 @@ class CacheInputFilesProcedure(
         // "**" 所有class文件和jar
         // "com.hujiang" 过滤 含"com.hujiang"的文件和jar
         //
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~cache input files")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~cache input files")
         val taskScheduler = BatchTaskScheduler()
 
         val excludeDir = variantCache.getExcludeFileDir()

@@ -35,7 +35,7 @@ import org.gradle.api.Project
  * </ul>
  * @author simon* @version 1.0.0* @since 2018-03-12
  */
-class AJXTransform(val project: Project) : Transform() {
+class AJXTransform(project: Project) : Transform() {
 
     private val ajxCache: AJXCache = AJXCache(project)
 
@@ -47,7 +47,7 @@ class AJXTransform(val project: Project) : Transform() {
         return TransformManager.CONTENT_CLASS
     }
 
-    override fun getScopes(): MutableSet<in QualifiedContent.Scope>? {
+    override fun getScopes(): MutableSet<in QualifiedContent.Scope> {
         return TransformManager.SCOPE_FULL_PROJECT
     }
 
@@ -60,36 +60,36 @@ class AJXTransform(val project: Project) : Transform() {
         // 每个变种都会执行
         val transformTaskVariantName = transformInvocation.context.variantName
         val cost = System.currentTimeMillis()
-        project.logger.warn("ajx[$transformTaskVariantName] transform start...")
+        LoggerHolder.logger.warn("ajx[$transformTaskVariantName] transform start...")
         // 之前可能是构建失败，也关闭所有打开的文件
         ClasspathJar.closeAllOpenedArchives()
-        val variantCache = VariantCache(project, ajxCache, transformTaskVariantName)
-        val ajxProcedure = AJXProcedure(project, variantCache, transformInvocation)
+        val variantCache = VariantCache(ajxCache, transformTaskVariantName)
+        val ajxProcedure = AJXProcedure(variantCache, transformInvocation)
         //check enable
-        ajxProcedure.with(CheckAspectJXEnableProcedure(project, variantCache, transformInvocation))
+        ajxProcedure.with(CheckAspectJXEnableProcedure(variantCache, transformInvocation))
         val incremental = transformInvocation.isIncremental
-        project.logger.warn("ajx[$transformTaskVariantName] incremental=${incremental}")
+        LoggerHolder.logger.warn("ajx[$transformTaskVariantName] incremental=${incremental}")
         if (incremental) {
             //incremental build
             ajxProcedure
-                .with(UpdateAspectFilesProcedure(project, variantCache, transformInvocation))
-                .with(UpdateInputFilesProcedure(project, variantCache, transformInvocation))
-                .with(UpdateAspectOutputProcedure(project, variantCache, transformInvocation))
+                .with(UpdateAspectFilesProcedure(variantCache, transformInvocation))
+                .with(UpdateInputFilesProcedure(variantCache, transformInvocation))
+                .with(UpdateAspectOutputProcedure(variantCache, transformInvocation))
         } else {
             //delete output and cache before full build
             transformInvocation.outputProvider.deleteAll()
             //full build
             ajxProcedure
-                .with(CacheAspectFilesProcedure(project, variantCache, transformInvocation))
-                .with(CacheInputFilesProcedure(project, variantCache, transformInvocation))
-                .with(DoAspectWorkProcedure(project, variantCache, transformInvocation))
+                .with(CacheAspectFilesProcedure(variantCache, transformInvocation))
+                .with(CacheInputFilesProcedure(variantCache, transformInvocation))
+                .with(DoAspectWorkProcedure(variantCache, transformInvocation))
         }
 
-        ajxProcedure.with(OnFinishedProcedure(project, variantCache, transformInvocation))
+        ajxProcedure.with(OnFinishedProcedure(variantCache, transformInvocation))
 
         ajxProcedure.doWorkContinuously()
         // 构建结束后关闭所有打开的文件
         ClasspathJar.closeAllOpenedArchives()
-        project.logger.warn("ajx[$transformTaskVariantName] transform finish.spend ${System.currentTimeMillis() - cost}ms")
+        LoggerHolder.logger.warn("ajx[$transformTaskVariantName] transform finish.spend ${System.currentTimeMillis() - cost}ms")
     }
 }

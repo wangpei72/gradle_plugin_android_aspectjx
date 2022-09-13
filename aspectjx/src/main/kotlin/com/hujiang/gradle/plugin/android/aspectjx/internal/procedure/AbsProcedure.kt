@@ -16,7 +16,6 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.TransformInvocation
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
-import org.gradle.api.Project
 
 /**
  * class description here
@@ -25,7 +24,6 @@ import org.gradle.api.Project
  * @since 2018-04-23
  */
 abstract class AbsProcedure(
-    val project: Project,
     val variantCache: VariantCache,
     val transformInvocation: TransformInvocation,
 ) {

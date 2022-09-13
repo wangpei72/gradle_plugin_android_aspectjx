@@ -15,6 +15,7 @@
 package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import org.gradle.api.Project
 
@@ -25,13 +26,12 @@ import org.gradle.api.Project
  * @since 2018-04-23
  */
 class OnFinishedProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     override fun doWorkContinuously(): Boolean {
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~onFinished")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~onFinished")
         variantCache.ajxCache.commit()
         return true
     }
