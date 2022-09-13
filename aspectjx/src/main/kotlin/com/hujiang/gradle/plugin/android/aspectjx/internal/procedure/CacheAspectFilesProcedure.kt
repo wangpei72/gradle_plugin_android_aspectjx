@@ -15,6 +15,7 @@
 package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.BatchTaskScheduler
@@ -31,13 +32,12 @@ import java.util.jar.JarFile
  * @since 2018-04-23
  */
 class CacheAspectFilesProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     override fun doWorkContinuously(): Boolean {
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~cache aspect files")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~cache aspect files")
         //缓存aspect文件
         val batchTaskScheduler = BatchTaskScheduler()
 
@@ -49,7 +49,7 @@ class CacheAspectFilesProcedure(
                     override fun call(): Any? {
                         dirInput.file.eachFileRecurse { item ->
                             if (AJXUtils.isAspectClass(item)) {
-                                project.logger.warn("[ajx] collect aspect file:${item.absolutePath}")
+                                LoggerHolder.logger.warn("[ajx] collect aspect file:${item.absolutePath}")
                                 val path = item.absolutePath
                                 val subPath = path.substring(dirInput.file.absolutePath.length)
                                 val cacheFile = File(variantCache.aspectPath + subPath)
@@ -75,7 +75,7 @@ class CacheAspectFilesProcedure(
                                 if (!jarEntry.isDirectory && AJXUtils.isClassFile(entryName)) {
                                     val bytes = jarFile.getInputStream(jarEntry).readBytes()
                                     if (AJXUtils.isAspectClass(bytes)) {
-                                        project.logger.warn("[ajx] collect aspect file[${entryName}] from JAR:${jarFile}")
+                                        LoggerHolder.logger.warn("[ajx] collect aspect file[${entryName}] from JAR:${jarFile}")
                                         val cacheFile =
                                             File(variantCache.aspectPath + File.separator + entryName)
                                         variantCache.add(bytes, cacheFile)

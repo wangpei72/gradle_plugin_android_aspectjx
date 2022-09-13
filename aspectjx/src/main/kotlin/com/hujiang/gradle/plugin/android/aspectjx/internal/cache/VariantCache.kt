@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  * class description here
  * @author simon* @version 1.0.0* @since 2018-04-13
  */
-class VariantCache(val project: Project, val ajxCache: AJXCache, val variantName: String) {
+class VariantCache(val ajxCache: AJXCache, val variantName: String) {
 
     lateinit var cachePath: String
     lateinit var aspectPath: String
@@ -51,7 +51,7 @@ class VariantCache(val project: Project, val ajxCache: AJXCache, val variantName
 
     private fun init() {
         cachePath =
-            project.buildDir.absolutePath + File.separator + AgpApiCompat.FD_INTERMEDIATES + "/ajx/" + variantName
+            ajxCache.buildDir.absolutePath + File.separator + AgpApiCompat.FD_INTERMEDIATES + "/ajx/" + variantName
         aspectPath = cachePath + File.separator + "aspecs"
         includeFilePath = cachePath + File.separator + "includeFiles"
         excludeFilePath = cachePath + File.separator + "excludeFiles"

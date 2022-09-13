@@ -2,7 +2,7 @@ plugins {
     // 根据需要测试的agp版本进行修改
     id 'com.android.application' version '7.2.2'
     id 'org.jetbrains.kotlin.android' version '1.6.21'
-    id 'io.github.wurensen.android-aspectjx' version '3.0.0'
+    id 'io.github.wurensen.android-aspectjx' version '3.1.0-SNAPSHOT'
 }
 
 // ajx配置

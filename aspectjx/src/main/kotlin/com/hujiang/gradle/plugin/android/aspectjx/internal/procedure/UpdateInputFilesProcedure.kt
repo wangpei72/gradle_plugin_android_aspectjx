@@ -17,12 +17,12 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.Status
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.BatchTaskScheduler
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.ITask
 import org.apache.commons.io.FileUtils
-import org.gradle.api.Project
 import java.io.File
 
 /**
@@ -30,13 +30,12 @@ import java.io.File
  * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class UpdateInputFilesProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     override fun doWorkContinuously(): Boolean {
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~update input files")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~update input files")
         val taskScheduler = BatchTaskScheduler()
 
         transformInvocation.inputs.forEach { input ->
@@ -46,7 +45,7 @@ class UpdateInputFilesProcedure(
                 taskScheduler.addTask(object : ITask {
                     override fun call(): Any? {
                         dirInput.changedFiles.forEach { (file, status) ->
-                            project.logger.debug("~~~~~~~~~~~~~~~~changed file::${status.name}::${file.absolutePath}")
+                            LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~changed file::${status.name}::${file.absolutePath}")
 
                             val path = file.absolutePath
                             val subPath = path.substring(dirInput.file.absolutePath.length)
@@ -100,7 +99,7 @@ class UpdateInputFilesProcedure(
                 .forEach { jarInput ->
                     taskScheduler.addTask(object : ITask {
                         override fun call(): Any? {
-                            project.logger.debug("~~~~~~~changed file::${jarInput.status.name}::${jarInput.file.absolutePath}")
+                            LoggerHolder.logger.debug("~~~~~~~changed file::${jarInput.status.name}::${jarInput.file.absolutePath}")
 
                             val filePath = jarInput.file.absolutePath
                             val outputJar = transformInvocation.outputProvider.getContentLocation(
