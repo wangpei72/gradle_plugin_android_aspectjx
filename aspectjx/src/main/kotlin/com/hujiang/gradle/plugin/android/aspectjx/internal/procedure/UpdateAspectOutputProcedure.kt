@@ -16,6 +16,7 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXTask
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXTaskManager
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
@@ -27,10 +28,9 @@ import org.gradle.api.Project
  * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class UpdateAspectOutputProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     private val ajxTaskManager: AJXTaskManager
 
@@ -46,7 +46,7 @@ class UpdateAspectOutputProcedure(
     }
 
     override fun doWorkContinuously(): Boolean {
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~update aspect output")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~update aspect output")
         ajxTaskManager.aspectPath.add(variantCache.getAspectDir())
         ajxTaskManager.classPath.add(variantCache.getIncludeFileDir())
         ajxTaskManager.classPath.add(variantCache.getExcludeFileDir())
@@ -54,11 +54,11 @@ class UpdateAspectOutputProcedure(
         val isAspectChanged = variantCache.incrementalStatus.isAspectChanged
         val isIncludeFileChanged = variantCache.incrementalStatus.isIncludeFileChanged
         if (isAspectChanged) {
-            project.logger.warn("[ajx][${variantCache.variantName}] aspect file changed, need rerun.")
+            LoggerHolder.logger.warn("[ajx][${variantCache.variantName}] aspect file changed, need rerun.")
         }
         if (isAspectChanged || isIncludeFileChanged) {
             //process class files
-            val ajxTask = AJXTask(project)
+            val ajxTask = AJXTask()
             val outputJar = transformInvocation.outputProvider.getContentLocation(
                 "include",
                 variantCache.contentTypes,
@@ -95,7 +95,7 @@ class UpdateAspectOutputProcedure(
                             FileUtils.deleteQuietly(outputJar)
                         }
                         if (!outputJar.exists()) {
-                            val jarTask = AJXTask(project)
+                            val jarTask = AJXTask()
                             jarTask.inPath.add(jarInput.file)
 
                             jarTask.outputJar = outputJar.absolutePath

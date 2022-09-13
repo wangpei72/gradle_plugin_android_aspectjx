@@ -15,6 +15,7 @@
 package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import org.gradle.api.Project
@@ -26,13 +27,12 @@ import org.gradle.api.Project
  * @since 2018-04-23
  */
 class CheckAspectJXEnableProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     override fun doWorkContinuously(): Boolean {
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~~~~ check aspectjx enable")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~~~~ check aspectjx enable")
 
         //check if exclude all files or not
         var isExcludeAll = false

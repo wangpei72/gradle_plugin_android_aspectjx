@@ -16,6 +16,7 @@ package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.Status
 import com.android.build.api.transform.TransformInvocation
+import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 import com.hujiang.gradle.plugin.android.aspectjx.internal.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.BatchTaskScheduler
@@ -30,13 +31,12 @@ import java.util.jar.JarFile
  * @author simon* @version 1.0.0* @since 2018-04-23
  */
 class UpdateAspectFilesProcedure(
-    project: Project,
     variantCache: VariantCache,
     transformInvocation: TransformInvocation
-) : AbsProcedure(project, variantCache, transformInvocation) {
+) : AbsProcedure(variantCache, transformInvocation) {
 
     override fun doWorkContinuously(): Boolean {
-        project.logger.debug("~~~~~~~~~~~~~~~~~~~~update aspect files")
+        LoggerHolder.logger.debug("~~~~~~~~~~~~~~~~~~~~update aspect files")
         //update aspect files
         val taskScheduler = BatchTaskScheduler()
 
@@ -47,7 +47,7 @@ class UpdateAspectFilesProcedure(
                     override fun call(): Any? {
                         dirInput.changedFiles.forEach { (file, status) ->
                             if (AJXUtils.isAspectClass(file)) {
-                                project.logger.warn("[ajx] collect aspect file from Dir:${file.absolutePath}")
+                                LoggerHolder.logger.warn("[ajx] collect aspect file from Dir:${file.absolutePath}")
                                 variantCache.incrementalStatus.isAspectChanged = true
                                 val path = file.absolutePath
                                 val subPath = path.substring(dirInput.file.absolutePath.length)
@@ -78,7 +78,7 @@ class UpdateAspectFilesProcedure(
                 .filter {
                     it.status != Status.NOTCHANGED && it.file.exists().also { exist ->
                         if (exist.not()) {
-                            project.logger.warn("[ajx] UpdateAspectFilesProcedure: jarInput[state=${it.status}] not exist [${it.file}]")
+                            LoggerHolder.logger.warn("[ajx] UpdateAspectFilesProcedure: jarInput[state=${it.status}] not exist [${it.file}]")
                         }
                     }
                 }
@@ -93,7 +93,7 @@ class UpdateAspectFilesProcedure(
                                 if (!jarEntry.isDirectory && AJXUtils.isClassFile(entryName)) {
                                     val bytes = jarFile.getInputStream(jarEntry).readBytes()
                                     if (AJXUtils.isAspectClass(bytes)) {
-                                        project.logger.warn("[ajx] UpdateAspectFilesProcedure:collect aspect file[${entryName}] from JAR:${jarFile}")
+                                        LoggerHolder.logger.warn("[ajx] UpdateAspectFilesProcedure:collect aspect file[${entryName}] from JAR:${jarFile}")
                                         val cacheFile =
                                             File(variantCache.aspectPath + File.separator + entryName)
                                         variantCache.incrementalStatus.isAspectChanged = true

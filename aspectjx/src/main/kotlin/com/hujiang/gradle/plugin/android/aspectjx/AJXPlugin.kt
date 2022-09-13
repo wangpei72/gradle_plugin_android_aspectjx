@@ -55,7 +55,7 @@ class AJXPlugin : Plugin<Project> {
         // throw an Exception to alert the user of this configuration issue.
         val applyWithPrerequisitePlugin = Action<AppliedPlugin> {
             if (wasApplied) {
-                project.logger.info(
+                LoggerHolder.logger.info(
                     "The android-aspectjx plugin was already applied to the project: ${project.path}" +
                             " and will not be applied again after plugin: ${it.id}"
                 )
@@ -80,22 +80,24 @@ class AJXPlugin : Plugin<Project> {
     }
 
     private fun doApply(project: Project) {
+        // 设置logger
+        LoggerHolder.logger = project.logger
         val gradleVersion = project.gradle.gradleVersion
         val dependencyGav = "org.aspectj:aspectjrt:1.9.6"
-        project.logger.quiet("[ajx] agp version[${Version.ANDROID_GRADLE_PLUGIN_VERSION}]")
+        LoggerHolder.logger.quiet("[ajx] agp version[${Version.ANDROID_GRADLE_PLUGIN_VERSION}]")
         if (GradleVersion.current() > GradleVersion.version("4.0")) {
-            project.logger.quiet("[ajx] gradle version[$gradleVersion] > 4.0")
+            LoggerHolder.logger.quiet("[ajx] gradle version[$gradleVersion] > 4.0")
             project.dependencies.add("implementation", dependencyGav)
         } else {
-            project.logger.quiet("[ajx] gradle version[$gradleVersion] < 4.0")
+            LoggerHolder.logger.quiet("[ajx] gradle version[$gradleVersion] < 4.0")
             project.dependencies.add("compile", dependencyGav)
         }
 
         val findAll = project.plugins.findAll(Closure.IDENTITY)
-        project.logger.quiet("[ajx] plugins:$findAll")
+        LoggerHolder.logger.quiet("[ajx] plugins:$findAll")
         //register AspectTransform
         val android = project.extensions.getByType(BaseExtension::class.java)
         android.registerTransform(AJXTransform(project))
-        project.logger.quiet("[ajx] register AJXTransform:${android.transforms}")
+        LoggerHolder.logger.quiet("[ajx] register AJXTransform:${android.transforms}")
     }
 }
