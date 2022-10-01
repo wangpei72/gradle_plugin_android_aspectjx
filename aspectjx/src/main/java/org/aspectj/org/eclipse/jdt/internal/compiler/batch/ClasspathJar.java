@@ -453,7 +453,7 @@ public class ClasspathJar extends ClasspathLocation {
             }
         }
         cost = System.currentTimeMillis() - cost;
-        System.out.println("[ajx] close all open jar files: count=" + count + ",cost=" + cost + "ms");
+        System.out.println("[ajx] close all open jar files: count=" + count + ".[" + cost + "ms]");
         openArchives.clear();
     }
 }

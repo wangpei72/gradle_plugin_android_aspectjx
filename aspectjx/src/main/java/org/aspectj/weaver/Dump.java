@@ -1,12 +1,12 @@
 /* *******************************************************************
  * Copyright (c) 2004,2010 Contributors
- * All rights reserved. 
- * This program and the accompanying materials are made available 
- * under the terms of the Eclipse Public License v1.0 
- * which accompanies this distribution and is available at 
- * http://www.eclipse.org/legal/epl-v10.html 
- *  
- * Contributors: 
+ * All rights reserved.
+ * This program and the accompanying materials are made available
+ * under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
  *     Matthew Webster, IBM
  * ******************************************************************/
 package org.aspectj.weaver;
@@ -48,18 +48,24 @@ public class Dump {
 
 	private static Class<?> exceptionClass;
 	private static IMessage.Kind conditionKind = IMessage.ABORT;
-	private static File directory = new File(".");
+	// 通过ThreadLocal包装支持多线程
+	private static final ThreadLocal<File> directory = new ThreadLocal<File>(){
+		@Override
+		protected File initialValue() {
+			return new File(".");
+		}
+	};
 
 	private String reason;
 	private String fileName;
 	private PrintStream print;
 
 	// 通过ThreadLocal包装支持多线程
-	private static ThreadLocal<String[]> savedCommandLine = new ThreadLocal<>();
+	private static final ThreadLocal<String[]> savedCommandLine = new ThreadLocal<>();
 	// 通过ThreadLocal包装支持多线程
-	private static ThreadLocal<List<String>> savedFullClasspath = new ThreadLocal<>();
+	private static final ThreadLocal<List<String>> savedFullClasspath = new ThreadLocal<>();
 	// 通过ThreadLocal包装支持多线程
-	private static ThreadLocal<IMessageHolder> savedMessageHolder = new ThreadLocal<>();
+	private static final ThreadLocal<IMessageHolder> savedMessageHolder = new ThreadLocal<>();
 
 	// private static Map<INode, WeakReference<INode>> nodes = Collections
 	// .synchronizedMap(new WeakHashMap<INode, WeakReference<INode>>());
@@ -206,7 +212,8 @@ public class Dump {
 
 		File newDirectory = new File(directoryName);
 		if (newDirectory.exists()) {
-			directory = newDirectory;
+			directory.set(newDirectory);
+//			directory = newDirectory;
 			success = true;
 		}
 
@@ -395,10 +402,10 @@ public class Dump {
 		}
 
 		Date now = new Date();
-		fileName = FILENAME_PREFIX + "." + new SimpleDateFormat("yyyyMMdd").format(now) + "."
-				+ new SimpleDateFormat("HHmmss.SSS").format(now) + "." + FILENAME_SUFFIX;
+		fileName = FILENAME_PREFIX + "." + new SimpleDateFormat("yyyyMMddHHmmss.SSS").format(now) + "." + FILENAME_SUFFIX;
 		try {
-			File file = new File(directory, fileName);
+			File file = new File(directory.get(), fileName);
+//			File file = new File(directory, fileName);
 			print = new PrintStream(new FileOutputStream(file), true);
 			trace.info("Dumping to " + file.getAbsolutePath());
 		} catch (Exception ex) {

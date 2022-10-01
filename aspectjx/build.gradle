@@ -1,6 +1,6 @@
 plugins {
     // 引入kotlin
-    id 'org.jetbrains.kotlin.jvm' version '1.6.21'
+    id 'org.jetbrains.kotlin.jvm'
     // 发布到gradlePluginPortal
     id 'com.gradle.plugin-publish' version '1.0.0'
 }
