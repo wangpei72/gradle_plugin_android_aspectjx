@@ -2,6 +2,15 @@
 
 版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
 
+## [3.2.0] - 2022-10-01
+
+### Added
+
+- 重构代码，重新实现整套逻辑，更好的支持增量编译的各种情况
+- 支持application和library同时引入（[#30](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/30)）
+### Fixed
+
+- 修复：织入规则类来自于module或者jar，删除该织入类后增量编译运行会找不到类（[#36](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/36)）
 ## [3.1.0] - 2022-09-13
 
 ### Added

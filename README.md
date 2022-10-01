@@ -5,9 +5,9 @@ AspectJX
 
 > [原作者说明文档](./README-old.md) 
 
-## 最新版本（3.1.0）
+## 最新版本（3.2.0）
 
-[查看完整版本日志](CHANGELOG.md)
+接入或者升级前，请先[查看完整版本日志](CHANGELOG.md)
 
 > 开发中的测试版本访问：[Sonatype's snapshot repository](https://s01.oss.sonatype.org/content/repositories/snapshots/io/github/wurensen/gradle-android-plugin-aspectjx/)
 
@@ -57,7 +57,7 @@ plugins {
 }
 ```
 
-> 对于3.0.0以下版本想采用plugins方式，请用旧版本id，并且自定义拉取策略：[配置方式](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/27)
+> 对于`3.0.0`以下版本想采用plugins方式，请用旧版本id，并且自定义拉取策略：[配置方式](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/27)
 
 ### AspectJX配置
 
@@ -72,9 +72,9 @@ aspectjx {
 }
 ```
 
-> 注意事项1：规则的描述尽量用比较具体的范围，防止exclude的范围超出预期
-> 注意事项2：注意apt编译期生成的类，比如项目的某个module模块用到glide注解生成类，生成的类会匹配上com.bumptech.glide导致整个module被过滤
-> 注意事项3：织入文件本身是需要当成待处理文件被自己处理的，所以排除规则注意避免把织入文件也排除了，否则可能会导致运行时异常
+> **注意事项1：规则的描述尽量用比较具体的范围，防止exclude的范围超出预期**
+> **注意事项2：注意apt编译期生成的类，比如项目的某个module模块用到glide注解生成类，生成的类会匹配上com.bumptech.glide导致整个module被过滤**
+> **注意事项3：织入文件本身是需要当成待处理文件被自己处理的，所以排除规则注意避免把织入文件也排除了，否则可能会导致运行时异常**
 
 **支持`*`和`**`匹配单独使用**
 
@@ -96,7 +96,6 @@ aspectjx {
 }
 ```
 
-
 ## 适配情况
 
 | 使用依赖 | 适配版本 | 兼容版本 |
@@ -106,6 +105,19 @@ aspectjx {
 | org.aspectj:aspectjtools | 1.9.6 | 1.9.6 |
 
 > 适配AGP最新大版本和兼容上一个大版本
+
+## 问题排查
+
+从`3.2.0`版本开始，插件会把相关信息记录到对应`module`的`build/transformClassesWithAjxForVariantName`目录下：
+
+| 目录/文件名称         | 说明                                                         |
+| :-------------------- | :----------------------------------------------------------- |
+| aspectFiles           | 该目录包含收集到的所有织入规则类                             |
+| weaveTmp              | 该目录用于织入class类型文件时使用，其中input包含符合规则的class文件，output包含对input织入得到的结果class文件 |
+| buildConfigCache.json | 该json文件用于增量构建，并记录AJX插件配置、织入规则文件信息、符合匹配规则的class文件或者jar、织入输出结果（包含costMillis字段，表示织入处理耗时，可以根据该耗时来进行调优，把确认不需要织入处理的class文件或者jar添加到排除规则中） |
+| logs                  | 该目录用于存储日志，当织入失败时，日志文件会写入到该目录，可用于排查织入出错的场景 |
+
+> 该目录在非增量构建时会被清除
 
 ## 常见问题
 
