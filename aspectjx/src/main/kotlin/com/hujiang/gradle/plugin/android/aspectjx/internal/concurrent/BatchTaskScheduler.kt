@@ -24,10 +24,19 @@ import java.util.concurrent.Executors
 class BatchTaskScheduler(corePoolSize: Int = Runtime.getRuntime().availableProcessors() + 1) {
 
     private val executorService: ExecutorService
-    val tasks = mutableListOf<ITask>()
+    private val tasks = mutableListOf<ITask>()
 
     init {
         executorService = Executors.newScheduledThreadPool(corePoolSize)
+    }
+
+    fun schedule(block: () -> Unit) {
+        this.addTask(object : ITask {
+            override fun call(): Any? {
+                block()
+                return null
+            }
+        })
     }
 
     fun <T : ITask> addTask(task: T) {

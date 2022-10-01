@@ -1,28 +1,19 @@
-/*
- * Copyright 2018 firefly1126, Inc.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.gradle_plugin_android_aspectjx
- */
 package com.hujiang.gradle.plugin.android.aspectjx
 
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
+import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.AJXCache
-import com.hujiang.gradle.plugin.android.aspectjx.internal.cache.VariantCache
-import com.hujiang.gradle.plugin.android.aspectjx.internal.procedure.*
+import com.hujiang.gradle.plugin.android.aspectjx.compat.AgpApiCompat
+import com.hujiang.gradle.plugin.android.aspectjx.internal.procedure.DoAspectProcedure
+import com.hujiang.gradle.plugin.android.aspectjx.internal.procedure.PrepareProcedure
+import com.hujiang.gradle.plugin.android.aspectjx.internal.procedure.ProcedureChain
+import com.hujiang.gradle.plugin.android.aspectjx.internal.procedure.ProcedureContext
+import com.hujiang.gradle.plugin.android.aspectjx.internal.utils.AJXUtils
 import org.aspectj.org.eclipse.jdt.internal.compiler.batch.ClasspathJar
 import org.gradle.api.Project
+import java.io.File
 
 /**
  * Aspect处理<br>
@@ -37,10 +28,83 @@ import org.gradle.api.Project
  */
 class AJXTransform(project: Project) : Transform() {
 
-    private val ajxCache: AJXCache = AJXCache(project)
+    companion object {
+        const val TAG = "ajx"
+    }
+
+    /**
+     * 是否是library
+     */
+    private val isLibrary = project.plugins.hasPlugin(LibraryPlugin::class.java)
+
+    /**
+     * 变种对应编译选项
+     */
+    private val variantCompileOptions = mutableMapOf<String, ProcedureContext.CompileOptions>()
+
+    /**
+     * 插件配置
+     */
+    private lateinit var ajxExtension: AJXExtension
+
+    init {
+        project.afterEvaluate {
+            // 获取配置
+            ajxExtension = project.extensions.findByType(AJXExtension::class.java) ?: AJXExtension()
+            // 规则重整
+            optimizeExtension(ajxExtension)
+            LoggerHolder.logger.quiet("[$TAG] AJXExtension after optimize:$ajxExtension")
+            // 获取android配置以及对应编译选项
+            createVariantCompileOptions(AndroidConfig(project))
+            // 设置运行变量
+            System.setProperty("aspectj.multithreaded", "true")
+        }
+    }
+
+    private fun optimizeExtension(extension: AJXExtension) {
+        extension.apply {
+            // 排除所有，等同于禁用
+            if (this.excludes.contains("*") || this.excludes.contains("**")) {
+                this.enabled = false
+            }
+            // 插件禁用，清除其它所有配置项
+            if (this.enabled.not()) {
+                this.includes.clear()
+                this.excludes.clear()
+                this.ajcArgs.clear()
+            } else {
+                // 包含所有，简化包含规则
+                if (this.includes.contains("*") || this.includes.contains("**")) {
+                    this.includes.clear()
+                }
+                // 重新排序
+                includes.sort()
+                excludes.sort()
+                ajcArgs.sort()
+            }
+        }
+    }
+
+    private fun createVariantCompileOptions(androidConfig: AndroidConfig) {
+        for (variant in androidConfig.getVariants()) {
+            val compileOptions = ProcedureContext.CompileOptions().apply {
+                // 兼容agp版本
+                val javaCompile = AgpApiCompat.getJavaCompile(variant)
+                encoding = javaCompile.options.encoding ?: "UTF-8"
+                sourceCompatibility = javaCompile.sourceCompatibility
+                targetCompatibility = javaCompile.targetCompatibility
+                // 记录参与编译的文件，包括javac、kotlin-class以及jar
+                val javac = javaCompile.destinationDirectory.asFile.get().absolutePath
+                javaCompileClasspath = javaCompile.classpath.asPath + File.pathSeparator + javac
+                bootClassPath =
+                    androidConfig.getBootClasspath().joinToString(separator = File.pathSeparator)
+            }
+            variantCompileOptions[variant.name] = compileOptions
+        }
+    }
 
     override fun getName(): String {
-        return "ajx"
+        return TAG
     }
 
     override fun getInputTypes(): Set<QualifiedContent.ContentType> {
@@ -48,7 +112,8 @@ class AJXTransform(project: Project) : Transform() {
     }
 
     override fun getScopes(): MutableSet<in QualifiedContent.Scope> {
-        return TransformManager.SCOPE_FULL_PROJECT
+        // library只支持PROJECT_ONLY
+        return if (isLibrary) TransformManager.PROJECT_ONLY else TransformManager.SCOPE_FULL_PROJECT
     }
 
     override fun isIncremental(): Boolean {
@@ -56,40 +121,41 @@ class AJXTransform(project: Project) : Transform() {
         return true
     }
 
+    override fun getParameterInputs(): MutableMap<String, Any> {
+        // 插件拓展配置也当成输入，这样可以在修改配置时候使task触发全量编译
+        return mutableMapOf(
+            "AJXExtension" to AJXUtils.optToJsonString(ajxExtension)!!
+        )
+    }
+
     override fun transform(transformInvocation: TransformInvocation) {
         // 每个变种都会执行
-        val transformTaskVariantName = transformInvocation.context.variantName
-        val cost = System.currentTimeMillis()
-        LoggerHolder.logger.warn("ajx[$transformTaskVariantName] transform start...")
+        val startTime = System.currentTimeMillis()
+        logQuiet(
+            transformInvocation,
+            "transform start.[isIncrement=${transformInvocation.isIncremental}]"
+        )
         // 之前可能是构建失败，也关闭所有打开的文件
         ClasspathJar.closeAllOpenedArchives()
-        val variantCache = VariantCache(ajxCache, transformTaskVariantName)
-        val ajxProcedure = AJXProcedure(variantCache, transformInvocation)
-        //check enable
-        ajxProcedure.with(CheckAspectJXEnableProcedure(variantCache, transformInvocation))
-        val incremental = transformInvocation.isIncremental
-        LoggerHolder.logger.warn("ajx[$transformTaskVariantName] incremental=${incremental}")
-        if (incremental) {
-            //incremental build
-            ajxProcedure
-                .with(UpdateAspectFilesProcedure(variantCache, transformInvocation))
-                .with(UpdateInputFilesProcedure(variantCache, transformInvocation))
-                .with(UpdateAspectOutputProcedure(variantCache, transformInvocation))
-        } else {
-            //delete output and cache before full build
-            transformInvocation.outputProvider.deleteAll()
-            //full build
-            ajxProcedure
-                .with(CacheAspectFilesProcedure(variantCache, transformInvocation))
-                .with(CacheInputFilesProcedure(variantCache, transformInvocation))
-                .with(DoAspectWorkProcedure(variantCache, transformInvocation))
-        }
-
-        ajxProcedure.with(OnFinishedProcedure(variantCache, transformInvocation))
-
-        ajxProcedure.doWorkContinuously()
+        process(transformInvocation)
         // 构建结束后关闭所有打开的文件
         ClasspathJar.closeAllOpenedArchives()
-        LoggerHolder.logger.warn("ajx[$transformTaskVariantName] transform finish.spend ${System.currentTimeMillis() - cost}ms")
+        logQuiet(
+            transformInvocation,
+            "transform finish.[${System.currentTimeMillis() - startTime}ms]"
+        )
+    }
+
+    private fun process(transformInvocation: TransformInvocation) {
+        val compileOptions = variantCompileOptions[transformInvocation.context.variantName]
+        val procedureContext = ProcedureContext(transformInvocation, compileOptions!!, ajxExtension)
+        ProcedureChain(procedureContext)
+            .with(PrepareProcedure(procedureContext))
+            .with(DoAspectProcedure(procedureContext))
+            .doWorkContinuously(transformInvocation)
+    }
+
+    private fun logQuiet(transformInvocation: TransformInvocation, msg: String) {
+        LoggerHolder.logger.quiet("[${transformInvocation.context.path}]: $msg")
     }
 }

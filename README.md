@@ -74,6 +74,7 @@ aspectjx {
 
 > 注意事项1：规则的描述尽量用比较具体的范围，防止exclude的范围超出预期
 > 注意事项2：注意apt编译期生成的类，比如项目的某个module模块用到glide注解生成类，生成的类会匹配上com.bumptech.glide导致整个module被过滤
+> 注意事项3：织入文件本身是需要当成待处理文件被自己处理的，所以排除规则注意避免把织入文件也排除了，否则可能会导致运行时异常
 
 **支持`*`和`**`匹配单独使用**
 
@@ -122,7 +123,6 @@ aspectjx {
 
   ```groovy
   aspectjx {
-      enabled = false
       // 移除kotlin相关，编译错误和提升速度
       exclude 'kotlin.jvm', 'kotlin.internal'
       exclude 'kotlinx.coroutines.internal', 'kotlinx.coroutines.android'

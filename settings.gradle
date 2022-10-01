@@ -5,6 +5,7 @@ pluginManagement {
             switch (requested.id.id) {
                 // agp不是所有版本都能通过plugins方式拉取到，统一采用classpath方式拉取
                 case "com.android.application":
+                case "com.android.library":
                     def agpModule = "com.android.tools.build:gradle:${requested.version}"
                     useModule(agpModule)
                     break
@@ -31,3 +32,4 @@ dependencyResolutionManagement {
 }
 include ':aspectjx'
 include ':app'
+include ':testlibrary'
