@@ -53,8 +53,10 @@ publishing {
             // 校验不支持本地文件目录
             if (mavenUrl.startsWith("https")) {
                 credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
+                    if (project.hasProperty("ossrhUsername") && project.hasProperty("ossrhPassword")) {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
                 }
             }
         }
