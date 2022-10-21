@@ -8,6 +8,10 @@
 
 - aspectjx新增配置项：`debug=[true|false]`，用于输出织入信息等相关日志（[#44](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/44)）
 
+- 升级aspectjtools版本：1.9.7（1.9.8需要构建环境jdk为11，所以暂不升级）
+
+  > [aspectj官方releases信息](https://github.com/eclipse/org.aspectj/releases)
+
 ### Fixed
 
 - 修复：拷贝的`TABLESWITCH.java`中，处理机制有问题，导致被织入类字节码出错（[#45](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/45)）
