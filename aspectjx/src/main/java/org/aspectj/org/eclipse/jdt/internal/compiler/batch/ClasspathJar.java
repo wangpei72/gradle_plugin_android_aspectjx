@@ -442,7 +442,7 @@ public class ClasspathJar extends ClasspathLocation {
 
     // 重写文件拓展的内容
     // 关闭所有打开的jar文件
-    public static void closeAllOpenedArchives() {
+    public static void closeAllOpenedArchives(String loggerPrefix) {
 		long cost = System.currentTimeMillis();
 		int count = 0;
         for (ZipFile openArchive : openArchives) {
@@ -456,7 +456,7 @@ public class ClasspathJar extends ClasspathLocation {
             }
         }
         cost = System.currentTimeMillis() - cost;
-        System.out.println("[ajx] close all open jar files: count=" + count + ".[" + cost + "ms]");
+        System.out.println(loggerPrefix + "close all open jar files: count=" + count + ".[" + cost + "ms]");
         openArchives.clear();
     }
 }

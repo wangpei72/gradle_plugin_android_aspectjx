@@ -6,6 +6,9 @@ plugins {
 
 // ajx配置
 aspectjx {
+    // 是否debug，开启后会输出织入信息等相关日志（3.3.0版本新增）
+    debug = true
+    // 是否启动
     enabled = true
     // 移除测试
     exclude 'com.lancewu.aspectj.AppExcludeTest'

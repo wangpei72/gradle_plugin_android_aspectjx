@@ -9,7 +9,7 @@ import com.hujiang.gradle.plugin.android.aspectjx.LoggerHolder
 abstract class AbsProcedure(val procedureContext: ProcedureContext) {
 
     private val logger = LoggerHolder.logger
-    private val loggerPrefix = "[${procedureContext.transformInvocation.context.path}]:"
+    protected val loggerPrefix = "[${procedureContext.transformInvocation.context.path}]:"
 
     abstract fun doWorkContinuously(transformInvocation: TransformInvocation): Boolean
 
@@ -18,6 +18,10 @@ abstract class AbsProcedure(val procedureContext: ProcedureContext) {
     }
 
     fun logInfo(msg: String) {
-        logger.info("$loggerPrefix $msg")
+        if (procedureContext.buildConfig.extension.debug) {
+            logQuiet(msg)
+        } else {
+            logger.info("$loggerPrefix $msg")
+        }
     }
 }

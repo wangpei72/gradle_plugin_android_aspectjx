@@ -225,15 +225,18 @@ class DoAspectProcedure(procedureContext: ProcedureContext) : AbsProcedure(proce
         val inputFile = inputOutput.inputFile
         val outputFile = inputOutput.outputFile
         val dest = inputOutput.dest
+        val extension = procedureContext.buildConfig.extension
         AJXTask().run {
             // 设置通用参数
+            this.logWeaveInfo = extension.debug
+            this.loggerPrefix = this@DoAspectProcedure.loggerPrefix
             this.dumpDirectory = procedureContext.logsDir
             this.encoding = compileOptions.encoding
             this.sourceCompatibility = compileOptions.sourceCompatibility
             this.targetCompatibility = compileOptions.targetCompatibility
             this.bootClassPath = compileOptions.bootClassPath
             this.classPath = compileOptions.javaCompileClasspath
-            this.ajcArgs = procedureContext.buildConfig.extension.ajcArgs
+            this.ajcArgs = extension.ajcArgs
             // 设置织入规则文件所在目录
             this.aspectPath.add(procedureContext.aspectFilesDir)
             if (format == Format.JAR) {

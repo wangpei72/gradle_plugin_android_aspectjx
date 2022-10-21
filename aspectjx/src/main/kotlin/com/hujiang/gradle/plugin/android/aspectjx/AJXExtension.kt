@@ -16,7 +16,7 @@ open class AJXExtension {
     val excludes = mutableListOf<String>()
 
     /**
-     * aspectjtools.jar支持的参数
+     * aspectjtools.jar支持的参数，请误乱使用，否则可能会产生未知问题！！！
      */
     val ajcArgs = mutableListOf<String>()
 
@@ -24,6 +24,12 @@ open class AJXExtension {
      * 是否启用，默认启用
      */
     var enabled = true
+
+    /**
+     * 是否开启debug模式，输出调试相关信息，以便排查问题，默认关闭
+     * @since 3.3.0
+     */
+    var debug = false
 
     fun include(vararg filters: String): AJXExtension {
         this.includes.addAll(filters)
@@ -41,7 +47,7 @@ open class AJXExtension {
     }
 
     override fun toString(): String {
-        return "AJXExtension(includes=$includes, excludes=$excludes, ajcArgs=$ajcArgs, enabled=$enabled)"
+        return "AJXExtension(includes=$includes, excludes=$excludes, ajcArgs=$ajcArgs, enabled=$enabled, debug=$debug)"
     }
 
 }
