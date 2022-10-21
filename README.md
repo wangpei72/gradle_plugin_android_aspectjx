@@ -5,7 +5,7 @@ AspectJX
 
 > [原作者说明文档](./README-old.md) 
 
-## 最新版本（3.2.0）
+## 最新版本（3.3.0）
 
 接入或者升级前，请先[查看完整版本日志](CHANGELOG.md)
 
@@ -17,7 +17,7 @@ AspectJX
 
 **方式一：`apply`方式**
 
-在项目根目录的build.gradle里依赖**AspectJX**
+在项目根目录的`build.gradle`里依赖**AspectJX**
 
 ```groovy
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
@@ -34,7 +34,7 @@ buildscript {
 }
 ```
 
-在app项目的build.gradle里应用插件：
+在`app`项目的`build.gradle`里应用插件：
 
 ```groovy
 // 3.0.0开始，id已变更：
@@ -60,6 +60,43 @@ plugins {
 > 对于`3.0.0`以下版本想采用plugins方式，请用旧版本id，并且自定义拉取策略：[配置方式](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/27)
 
 ### AspectJX配置
+
+所有配置项（该类成员对应`gradle`文件中的`aspectjx`规则）：
+
+```kotlin
+/**
+ * 配置文件
+ */
+open class AJXExtension {
+
+    /**
+     * 包含规则
+     */
+    val includes = mutableListOf<String>()
+
+    /**
+     * 排除规则
+     */
+    val excludes = mutableListOf<String>()
+
+    /**
+     * aspectjtools.jar支持的参数，请误乱使用，否则可能会产生未知问题！！！
+     */
+    val ajcArgs = mutableListOf<String>()
+
+    /**
+     * 是否启用，默认启用
+     */
+    var enabled = true
+
+
+    /**
+     * 是否开启debug模式，输出调试相关信息，以便排查问题，默认关闭
+     * @since 3.3.0
+     */
+    var debug = false
+}
+```
 
 **AspectJX**默认会处理所有的二进制代码文件和库，为了提升编译效率及规避部分第三方库出现的编译兼容性问题，**AspectJX**提供`include`、`exclude`命令来过滤需要处理的文件及排除某些文件(包括class文件及jar文件)。
 
@@ -98,13 +135,23 @@ aspectjx {
 }
 ```
 
+**提供debug开关**
+```groovy
+aspectjx {
+    // 是否debug，开启后会输出织入信息等相关日志（3.3.0版本新增）
+    debug = true
+}
+```
+
+
 ## 适配情况
 
 | 使用依赖 | 适配版本 | 兼容版本 |
 | :-- | - | --- |
 | Android Gradle Plugin | 7.2.2 | 4.1.3 |
 | Gradle | 7.3.3 | 6.5 |
-| org.aspectj:aspectjtools | 1.9.6 | 1.9.6 |
+| org.aspectj:aspectjtools | 1.9.7 | 1.9.7 |
+| org.aspectj:aspectjrt（引入插件会自动引入该依赖） | 1.9.7 | 1.9.7 |
 
 > 适配AGP最新大版本和兼容上一个大版本
 
@@ -121,7 +168,13 @@ aspectjx {
 
 > 该目录在非增量构建时会被清除
 
+从`3.3.0`版本开始，新增`debug`配置项，开启后构建过程会输出织入信息等相关日志，可以根据`“[:app:transformClassesWithAjxForDebug]”`作为前缀来查询日志。
+
 ## 常见问题
+
+- 问：`library`模块引入插件，无法对第三方依赖库进行织入？
+
+  答：`library`模块引入插件，只能对当前模块的class文件进行处理，无法对依赖库进行处理，只有`app`模块能对依赖库进行处理。
 
 - 问：**AspectJX**是否支持`*.aj`文件的编译?
 
@@ -129,7 +182,7 @@ aspectjx {
 
 - 问：编译时会出现`can't determine superclass of missing type**`及其他编译错误怎么办？
 
-  答：大部分情况下把出现问题相关的class文件或者库（jar文件）过滤掉就可以搞定了
+  答：大部分情况下把出现问题相关的class文件或者依赖库（jar文件）过滤掉就可以搞定了
 
 - 问：项目使用kotlin或kotlin协程，发生织入错误？
 

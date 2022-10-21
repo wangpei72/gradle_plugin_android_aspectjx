@@ -2,6 +2,16 @@
 
 版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
 
+## [3.3.0] - 2022-10-21
+
+### Added
+
+- aspectjx新增配置项：`debug=[true|false]`，用于输出织入信息等相关日志（[#44](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/44)）
+
+### Fixed
+
+- 修复：拷贝的`TABLESWITCH.java`中，处理机制有问题，导致被织入类字节码出错（[#45](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/45)）
+
 ## [3.2.0] - 2022-10-01
 
 ### Added
@@ -11,6 +21,7 @@
 ### Fixed
 
 - 修复：织入规则类来自于module或者jar，删除该织入类后增量编译运行会找不到类（[#36](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/36)）
+
 ## [3.1.0] - 2022-09-13
 
 ### Added

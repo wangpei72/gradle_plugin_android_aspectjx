@@ -17,9 +17,19 @@ import java.io.File
 class AJXTask : ITask {
 
     /**
+     * 日志前缀
+     */
+    var loggerPrefix: String = "[${AJXTransform.TAG}]"
+
+    /**
+     * 是否输出织入信息
+     */
+    var logWeaveInfo: Boolean = true
+
+    /**
      * Dump日志保存的目录
      */
-    var dumpDirectory : File? = null
+    var dumpDirectory: File? = null
 
     /**
      * 编码
@@ -98,15 +108,13 @@ class AJXTask : ITask {
             args.add("-aspectpath")
             args.add(aspectPath.joinToString(separator = File.pathSeparator))
         }
-
-        if (outputDir.isNullOrEmpty().not()) {
+        outputDir?.let {
             args.add("-d")
-            args.add(outputDir!!)
+            args.add(it)
         }
-
-        if (outputJar.isNullOrEmpty().not()) {
+        outputJar?.let {
             args.add("-outjar")
-            args.add(outputJar!!)
+            args.add(it)
         }
 
         if (ajcArgs.isNotEmpty()) {
@@ -136,13 +144,18 @@ class AJXTask : ITask {
         val m = Main()
         m.run(args.toTypedArray(), handler)
         for (message in handler.getMessages(null, true)) {
-            val msg = "[${AJXTransform.TAG}][${message.kind}] " + message.message
+            val msg = "${loggerPrefix}[${message.kind}] ${message.message}"
             when (message.kind) {
                 IMessage.ABORT, IMessage.ERROR, IMessage.FAIL -> {
                     throw GradleException(msg, message.thrown)
                 }
                 IMessage.WARNING -> {
                     logger().warn(msg, message.thrown)
+                }
+                IMessage.WEAVEINFO -> {
+                    if (logWeaveInfo) {
+                        logger().quiet(msg, message.thrown)
+                    }
                 }
 //                IMessage.INFO -> {
 //                    logger().info(msg, message.thrown)

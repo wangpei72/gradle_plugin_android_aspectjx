@@ -136,10 +136,10 @@ class AJXTransform(project: Project) : Transform() {
             "transform start.[isIncrement=${transformInvocation.isIncremental}]"
         )
         // 之前可能是构建失败，也关闭所有打开的文件
-        ClasspathJar.closeAllOpenedArchives()
+        ClasspathJar.closeAllOpenedArchives(getLogPrefix(transformInvocation))
         process(transformInvocation)
         // 构建结束后关闭所有打开的文件
-        ClasspathJar.closeAllOpenedArchives()
+        ClasspathJar.closeAllOpenedArchives(getLogPrefix(transformInvocation))
         logQuiet(
             transformInvocation,
             "transform finish.[${System.currentTimeMillis() - startTime}ms]"
@@ -156,6 +156,10 @@ class AJXTransform(project: Project) : Transform() {
     }
 
     private fun logQuiet(transformInvocation: TransformInvocation, msg: String) {
-        LoggerHolder.logger.quiet("[${transformInvocation.context.path}]: $msg")
+        LoggerHolder.logger.quiet("${getLogPrefix(transformInvocation)}$msg")
+    }
+
+    private fun getLogPrefix(transformInvocation: TransformInvocation): String {
+        return "[${transformInvocation.context.path}]: "
     }
 }
