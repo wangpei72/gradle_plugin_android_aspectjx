@@ -2,21 +2,14 @@
  * Copyright (c) 2004,2010 Contributors
  * All rights reserved.
  * This program and the accompanying materials are made available
- * under the terms of the Eclipse Public License v1.0
+ * under the terms of the Eclipse Public License v 2.0
  * which accompanies this distribution and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt
  *
  * Contributors:
  *     Matthew Webster, IBM
  * ******************************************************************/
 package org.aspectj.weaver;
-
-import org.aspectj.bridge.IMessage;
-import org.aspectj.bridge.IMessageHolder;
-import org.aspectj.bridge.Version;
-import org.aspectj.weaver.tools.Trace;
-import org.aspectj.weaver.tools.TraceFactory;
-import org.aspectj.weaver.tools.Traceable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,9 +17,15 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+
+import org.aspectj.bridge.IMessage;
+import org.aspectj.bridge.IMessageHolder;
+import org.aspectj.bridge.Version;
+import org.aspectj.weaver.tools.Trace;
+import org.aspectj.weaver.tools.TraceFactory;
+import org.aspectj.weaver.tools.Traceable;
 
 /**
  * @author Matthew Webster
@@ -384,8 +383,7 @@ public class Dump {
 	private void dumpCompilerMessages(IMessageHolder messageHolder) {
 		println("---- Compiler Messages ---");
 		if (messageHolder != null) {
-			for (Iterator<IMessage> i = messageHolder.getUnmodifiableListView().iterator(); i.hasNext();) {
-				IMessage message = i.next();
+			for (IMessage message : messageHolder.getUnmodifiableListView()) {
 				println(message.toString());
 			}
 		} else {
@@ -402,7 +400,7 @@ public class Dump {
 		}
 
 		Date now = new Date();
-		fileName = FILENAME_PREFIX + "." + new SimpleDateFormat("yyyyMMddHHmmss.SSS").format(now) + "." + FILENAME_SUFFIX;
+		fileName = FILENAME_PREFIX + "." + new SimpleDateFormat("yyyyMMdd.HHmmss.SSS").format(now) + "." + FILENAME_SUFFIX;
 		try {
 			File file = new File(directory.get(), fileName);
 //			File file = new File(directory, fileName);
@@ -431,15 +429,14 @@ public class Dump {
 			return;
 		}
 
-		for (int i = 0; i < array.length; i++) {
-			print.println(array[i]);
+		for (Object o : array) {
+			print.println(o);
 		}
 	}
 
 	private void println(Properties props) {
-		Iterator iter = props.keySet().iterator();
-		while (iter.hasNext()) {
-			String key = (String) iter.next();
+		for (Object o : props.keySet()) {
+			String key = (String) o;
 			String value = props.getProperty(key);
 			print.println(key + "=" + value);
 		}
@@ -466,8 +463,7 @@ public class Dump {
 		if (list == null || list.isEmpty()) {
 			println(NULL_OR_EMPTY);
 		} else {
-			for (Iterator i = list.iterator(); i.hasNext();) {
-				Object o = i.next();
+			for (Object o : list) {
 				if (o instanceof Exception) {
 					println((Exception) o);
 				} else {
@@ -521,15 +517,15 @@ public class Dump {
 
 	public interface INode {
 
-		public void accept(IVisitor visior);
+		void accept(IVisitor visior);
 
 	}
 
 	public interface IVisitor {
 
-		public void visitObject(Object s);
+		void visitObject(Object s);
 
-		public void visitList(List list);
+		void visitList(List list);
 	}
 
 }

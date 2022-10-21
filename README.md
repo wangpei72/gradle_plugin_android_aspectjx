@@ -104,7 +104,7 @@ aspectjx {
 | :-- | - | --- |
 | Android Gradle Plugin | 7.2.2 | 4.1.3 |
 | Gradle | 7.3.3 | 6.5 |
-| org.aspectj:aspectjtools | 1.9.6 | 1.9.6 |
+| org.aspectj:aspectjtools | 1.9.7 | 1.9.7 |
 
 > 适配AGP最新大版本和兼容上一个大版本
 

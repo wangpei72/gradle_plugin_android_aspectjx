@@ -62,16 +62,16 @@ import org.aspectj.apache.bcel.util.ByteSequence;
 /**
  * TABLESWITCH - Switch within given range of values, i.e., low..high
  *
- * @author <A HREF="mailto:markus.dahm@berlin.de">M. Dahm</A>
  * @version $Id: TABLESWITCH.java,v 1.5 2008/08/28 00:05:29 aclement Exp $
+ * @author <A HREF="mailto:markus.dahm@berlin.de">M. Dahm</A>
  * @see SWITCH
  */
 public class TABLESWITCH extends InstructionSelect {
 
     /**
-     * @param match   sorted array of match values, match[0] must be low value, match[match_length - 1] high value
+     * @param match sorted array of match values, match[0] must be low value, match[match_length - 1] high value
      * @param targets where to branch for matched values
-     * @param target  default branch
+     * @param target default branch
      */
     public TABLESWITCH(int[] match, InstructionHandle[] targets, InstructionHandle target) {
         super(org.aspectj.apache.bcel.Constants.TABLESWITCH, match, targets, target);
@@ -127,9 +127,12 @@ public class TABLESWITCH extends InstructionSelect {
         indices = new int[matchLength];
         targets = new InstructionHandle[matchLength];
 
-        // bugfix: i++后超过int最大值
-        for (int i = low; i >= 0 && i <= high; i++) {
-            match[i - low] = i;
+        // bugfix: case使用的值可能是Integer.MAX_VALUE，i++后值溢出变为负数导致数组越界，所以需要重新修改算法
+//        for (int i = low; i <= high; i++) {
+//            match[i - low] = i;
+//        }
+        for (int i = 0; i < matchLength; i++) {
+            match[i] = low + i;
         }
 
         for (int i = 0; i < matchLength; i++) {

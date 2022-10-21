@@ -192,6 +192,8 @@ public class ClasspathJar extends ClasspathLocation {
 	}
 	@Override
 	public boolean hasAnnotationFileFor(String qualifiedTypeName) {
+		if (this.zipFile == null)
+			return false;
 		return this.zipFile.getEntry(qualifiedTypeName+ExternalAnnotationProvider.ANNOTATION_FILE_SUFFIX) != null;
 	}
 	@Override
@@ -318,6 +320,7 @@ public class ClasspathJar extends ClasspathLocation {
 		}
 		return false;
 	}
+
 	@Override
 	public char[][] listPackages() {
 		Set<String> packageNames = new HashSet<>();
