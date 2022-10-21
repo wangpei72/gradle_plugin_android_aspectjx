@@ -131,6 +131,7 @@ public class TABLESWITCH extends InstructionSelect {
 //        for (int i = low; i <= high; i++) {
 //            match[i - low] = i;
 //        }
+        // 已经提了issue，等官方修复后同步：https://github.com/eclipse/org.aspectj/issues/190
         for (int i = 0; i < matchLength; i++) {
             match[i] = low + i;
         }
