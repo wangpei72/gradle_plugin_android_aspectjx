@@ -96,10 +96,12 @@ class ProcedureContext(
      * 织入文件
      * @property source 来源：class或者jar
      * @property target 拷贝的织入文件路径
+     * @property lastModified 最后修改时间，用来判断织入文件是否发生修改
      */
     data class AspectFile(
         var source: String = "",
-        var target: String = ""
+        var target: String = "",
+        var lastModified: Long = 0L
     )
 
     /**
@@ -135,7 +137,7 @@ class ProcedureContext(
         var bootClassPath: String = ""
         var sourceCompatibility: String = ""
         var targetCompatibility: String = ""
-        var javaCompileClasspath: String = ""
+        var javaCompileClasspath = mutableSetOf<File>()
     }
 
 
@@ -221,6 +223,7 @@ class ProcedureContext(
             val aspectFile = AspectFile().apply {
                 this.source = source.absolutePath
                 this.target = target.absolutePath
+                this.lastModified = target.lastModified()
             }
             synchronized(aspectFiles) {
                 aspectFiles.add(aspectFile)

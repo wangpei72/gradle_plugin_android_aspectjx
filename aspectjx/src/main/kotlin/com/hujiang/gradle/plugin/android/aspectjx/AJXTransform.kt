@@ -93,9 +93,6 @@ class AJXTransform(project: Project) : Transform() {
                 encoding = javaCompile.options.encoding ?: "UTF-8"
                 sourceCompatibility = javaCompile.sourceCompatibility
                 targetCompatibility = javaCompile.targetCompatibility
-                // 记录参与编译的文件，包括javac、kotlin-class以及jar
-                val javac = javaCompile.destinationDirectory.asFile.get().absolutePath
-                javaCompileClasspath = javaCompile.classpath.asPath + File.pathSeparator + javac
                 bootClassPath =
                     androidConfig.getBootClasspath().joinToString(separator = File.pathSeparator)
             }
@@ -114,6 +111,15 @@ class AJXTransform(project: Project) : Transform() {
     override fun getScopes(): MutableSet<in QualifiedContent.Scope> {
         // library只支持PROJECT_ONLY
         return if (isLibrary) TransformManager.PROJECT_ONLY else TransformManager.SCOPE_FULL_PROJECT
+    }
+
+    override fun getReferencedScopes(): MutableSet<in QualifiedContent.Scope> {
+        return mutableSetOf(
+            QualifiedContent.Scope.PROJECT,
+            QualifiedContent.Scope.SUB_PROJECTS,
+            QualifiedContent.Scope.EXTERNAL_LIBRARIES,
+            QualifiedContent.Scope.PROVIDED_ONLY
+        )
     }
 
     override fun isIncremental(): Boolean {

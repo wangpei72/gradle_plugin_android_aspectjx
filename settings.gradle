@@ -33,3 +33,4 @@ dependencyResolutionManagement {
 include ':aspectjx'
 include ':app'
 include ':testlibrary'
+include ':javalibrary'

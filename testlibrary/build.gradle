@@ -6,6 +6,7 @@ plugins {
 
 // ajx配置，注意规则只对当前module生效，不会传递到app模块！！！
 aspectjx {
+    debug = true
     enabled = true
     // 移除测试
     exclude 'com.lancewu.aspectj.testlibrary.LibraryExcludeTest'

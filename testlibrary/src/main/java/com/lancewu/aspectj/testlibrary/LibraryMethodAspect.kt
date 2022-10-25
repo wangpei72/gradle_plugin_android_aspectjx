@@ -27,4 +27,10 @@ class LibraryMethodAspect {
         }
         return null
     }
+
+    @Around("call(* androidx.palette.graphics.Palette.Builder.generate())")
+    fun around_Palette_nenerate(joinPoint: ProceedingJoinPoint): Any? {
+        Log.d("LibraryMethodAspect", "before Palette.Builder.generate()")
+        return aroundOldResult(joinPoint)
+    }
 }

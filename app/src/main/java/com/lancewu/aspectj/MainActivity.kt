@@ -2,13 +2,12 @@ package com.lancewu.aspectj
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.View
+import android.view.View.OnClickListener
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.lancewu.aspectj.testlibrary.LibraryCompileOnlyTest
-import com.lancewu.aspectj.testlibrary.LibraryExcludeTest
-import com.lancewu.aspectj.testlibrary.LibraryIncludeTest
-import com.lancewu.aspectj.testlibrary.TestLibrary
+import com.lancewu.aspectj.testlibrary.*
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         AppExcludeTest().test()
         LibraryIncludeTest().test()
         LibraryExcludeTest().test()
+        LibraryJavaTest().test()
         LibraryCompileOnlyTest().test(Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888))
         clickAspect()
     }
@@ -27,9 +27,12 @@ class MainActivity : AppCompatActivity() {
     private fun clickAspect() {
         findViewById<Button>(R.id.btn).apply {
             text = "点击弹出toast"
-            setOnClickListener {
-                Toast.makeText(this@MainActivity, this@apply.text, Toast.LENGTH_LONG).show()
-            }
+            // lambda表达式无法正确织入：https://stackoverflow.com/a/31098062/5193118
+            setOnClickListener(object : OnClickListener {
+                override fun onClick(v: View?) {
+                    Toast.makeText(this@MainActivity, this@apply.text, Toast.LENGTH_LONG).show()
+                }
+            })
         }
     }
 

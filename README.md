@@ -5,7 +5,7 @@ AspectJX
 
 > [原作者说明文档](./README-old.md) 
 
-## 最新版本（3.3.0）
+## 最新版本（3.3.1）
 
 接入或者升级前，请先[查看完整版本日志](CHANGELOG.md)
 
@@ -88,7 +88,6 @@ open class AJXExtension {
      * 是否启用，默认启用
      */
     var enabled = true
-
 
     /**
      * 是否开启debug模式，输出调试相关信息，以便排查问题，默认关闭
