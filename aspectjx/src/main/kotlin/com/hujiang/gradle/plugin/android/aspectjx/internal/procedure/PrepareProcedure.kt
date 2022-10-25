@@ -1,8 +1,8 @@
 package com.hujiang.gradle.plugin.android.aspectjx.internal.procedure
 
 import com.android.build.api.transform.*
-import com.hujiang.gradle.plugin.android.aspectjx.internal.utils.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.concurrent.BatchTaskScheduler
+import com.hujiang.gradle.plugin.android.aspectjx.internal.utils.AJXUtils
 import com.hujiang.gradle.plugin.android.aspectjx.internal.utils.eachFileRecurse
 import java.io.File
 import java.util.jar.JarFile
@@ -36,6 +36,8 @@ class PrepareProcedure(procedureContext: ProcedureContext) :
     private fun prepare(transformInvocation: TransformInvocation) {
         val batchTaskScheduler = BatchTaskScheduler()
         val isIncremental = transformInvocation.isIncremental
+        // 收集所有编译类路径
+        collectClasspath(transformInvocation)
 
         transformInvocation.inputs.forEach { input ->
             // class文件类型（java和kotlin）
@@ -80,6 +82,27 @@ class PrepareProcedure(procedureContext: ProcedureContext) :
 
         batchTaskScheduler.execute()
         batchTaskScheduler.shutDown()
+    }
+
+    private fun collectClasspath(transformInvocation: TransformInvocation) {
+        val javaCompileClasspath = procedureContext.compileOptions.javaCompileClasspath
+        // 收集classpath
+        transformInvocation.referencedInputs.forEach { input ->
+            // class文件类型（java和kotlin）
+            input.directoryInputs.forEach { dirInput ->
+                // 添加到编译路径
+                javaCompileClasspath.add(dirInput.file)
+                logInfo("collectClasspath scope:${dirInput.scopes},dirInput=${dirInput.file}")
+            }
+
+            // jar类型（module被app使用时也是以jar体现）
+            input.jarInputs.forEach { jarInput ->
+                // 添加到编译路径
+                val inputFile = jarInput.file
+                javaCompileClasspath.add(inputFile)
+                logInfo("collectClasspath scope:${jarInput.scopes},jarInput=${inputFile}")
+            }
+        }
     }
 
     private fun doCollectForIncrement(

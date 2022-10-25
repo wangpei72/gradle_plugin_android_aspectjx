@@ -12,6 +12,7 @@ class LibraryCompileOnlyTest {
 
     fun test(bitmap: Bitmap) {
         TestLibrary().printLog("call from LibraryCompileOnlyTest")
+        // 测试compileOnly依赖的情况能不能正确织入
         Palette.from(bitmap).generate()
     }
 }

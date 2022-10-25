@@ -235,7 +235,7 @@ class DoAspectProcedure(procedureContext: ProcedureContext) : AbsProcedure(proce
             this.sourceCompatibility = compileOptions.sourceCompatibility
             this.targetCompatibility = compileOptions.targetCompatibility
             this.bootClassPath = compileOptions.bootClassPath
-            this.classPath = compileOptions.javaCompileClasspath
+            this.classPath = compileOptions.javaCompileClasspath.joinToString(File.pathSeparator)
             this.ajcArgs = extension.ajcArgs
             // 设置织入规则文件所在目录
             this.aspectPath.add(procedureContext.aspectFilesDir)
