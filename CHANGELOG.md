@@ -2,6 +2,14 @@
 
 版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
 
+## [3.3.1] - 2022-10-25
+
+### Fixed
+
+- 修复：classpath获取方式导致的构建失败问题（[#50](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/50)）
+
+- 修复：增量构建下，织入规则文件内容修改未能正确重新织入的问题（[#53](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/53)）
+
 ## [3.3.0] - 2022-10-21
 
 ### Added
