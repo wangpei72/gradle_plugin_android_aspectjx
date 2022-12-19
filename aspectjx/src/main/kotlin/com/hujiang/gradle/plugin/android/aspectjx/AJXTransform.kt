@@ -16,14 +16,14 @@ import org.gradle.api.Project
 import java.io.File
 
 /**
- * Aspect处理<br>
+ * Aspect处理类
+ *
  * 自定义transform几个问题需要注意：
- * <ul>
- *     <li>对于多flavor的构建，每个flavor都会执行transform</li>
- *     <li>对于开启gradle daemon的情况（默认开启的，一般也不会去关闭），每次构建都是运行在同一个进程上，
- *     所以要注意到有没有使用到有状态的静态或者单例，如果有的话，需要在构建结束进行处理，否则会影响到后续的构建</li>
- *     <li>增量构建时，要注意是否需要删除之前在outputProvider下已产生的产物</li>
- * </ul>
+ * - 对于多flavor的构建，每个flavor都会执行transform
+ * - 对于开启gradle daemon的情况（默认开启的，一般也不会去关闭），每次构建都是运行在同一个进程上，
+ * 所以要注意到有没有使用到有状态的静态或者单例，如果有的话，需要在构建结束进行处理，否则会影响到后续的构建
+ * - 增量构建时，要注意是否需要删除之前在outputProvider下已产生的产物
+ *
  * @author simon* @version 1.0.0* @since 2018-03-12
  */
 class AJXTransform(project: Project) : Transform() {
@@ -50,12 +50,12 @@ class AJXTransform(project: Project) : Transform() {
     init {
         project.afterEvaluate {
             // 获取配置
-            ajxExtension = project.extensions.findByType(AJXExtension::class.java) ?: AJXExtension()
+            ajxExtension = it.extensions.findByType(AJXExtension::class.java) ?: AJXExtension()
             // 规则重整
             optimizeExtension(ajxExtension)
             LoggerHolder.logger.quiet("[$TAG] AJXExtension after optimize:$ajxExtension")
             // 获取android配置以及对应编译选项
-            createVariantCompileOptions(AndroidConfig(project))
+            createVariantCompileOptions(AndroidConfig(it))
             // 设置运行变量
             System.setProperty("aspectj.multithreaded", "true")
         }
@@ -98,6 +98,7 @@ class AJXTransform(project: Project) : Transform() {
             }
             variantCompileOptions[variant.name] = compileOptions
         }
+        LoggerHolder.logger.quiet("[$TAG] variantCompileOptions:${variantCompileOptions.keys}")
     }
 
     override fun getName(): String {
