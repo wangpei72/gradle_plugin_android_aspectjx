@@ -2,7 +2,7 @@
 
 版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
 
-## [Unreleased]
+## [3.3.2] - 2022-12-20
 
 ### Fixed
 
