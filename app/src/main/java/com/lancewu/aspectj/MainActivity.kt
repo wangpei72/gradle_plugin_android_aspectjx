@@ -1,7 +1,9 @@
 package com.lancewu.aspectj
 
+import android.Manifest
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
@@ -22,6 +24,9 @@ class MainActivity : AppCompatActivity() {
         LibraryJavaTest().test()
         LibraryCompileOnlyTest().test(Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888))
         clickAspect()
+        findViewById<Button>(R.id.two_annotation_btn).setOnClickListener {
+            testAnnotationsWrapper(this)
+        }
     }
 
     private fun clickAspect() {
@@ -38,5 +43,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun toast() {
         // 通过aop织入
+    }
+
+    @Permissions([Manifest.permission.CAMERA])
+    private fun testAnnotationsWrapper(activity: MainActivity) {
+        Log.d("testAnnotationsWrapper", "call")
+        testAnnotations()
+    }
+
+    /**
+     * 多个注解织入，在织入处理时如果存在延期调用，会出现EmptyStackException异常，因为这不符合aspectj机制设计。
+     * 解决办法是，存在延期调用业务时，独立一个函数，比如这边的testAnnotationsWrapper，注解拆分出来处理
+     *
+     * [详情：多注解异常](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/60)
+     */
+    @AOPLog
+//    @Permissions([Manifest.permission.CAMERA])
+    private fun testAnnotations() {
+        Log.d("testAnnotations", "call")
     }
 }
