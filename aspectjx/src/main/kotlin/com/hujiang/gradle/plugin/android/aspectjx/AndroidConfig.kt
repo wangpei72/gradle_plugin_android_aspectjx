@@ -1,10 +1,7 @@
 package com.hujiang.gradle.plugin.android.aspectjx
 
 
-import com.android.build.gradle.AbstractAppExtension
-import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.TestExtension
+import com.android.build.gradle.*
 import com.android.build.gradle.api.BaseVariant
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.GradleException
@@ -23,18 +20,36 @@ class AndroidConfig(project: Project) {
      *
      * @return Collection of variants.
      */
-    fun getVariants(): DomainObjectSet<BaseVariant> {
-        return when (android) {
+    fun getVariants(): Set<BaseVariant> {
+        val set = mutableSetOf<BaseVariant>()
+        if (android is TestedExtension) {
+            // 加上testVariants
+            set.addAll(android.testVariants)
+        }
+        when (android) {
             is AbstractAppExtension -> {
-                android.applicationVariants as DomainObjectSet<BaseVariant>
+                set.addAll(android.applicationVariants)
             }
             is TestExtension -> {
-                android.applicationVariants as DomainObjectSet<BaseVariant>
+                set.addAll(android.applicationVariants)
             }
             is LibraryExtension -> {
-                android.libraryVariants as DomainObjectSet<BaseVariant>
+                set.addAll(android.libraryVariants)
             }
             else -> throw GradleException("nonsupport extension:$android")
+        }
+        return set
+    }
+
+    /**
+     * Return all test variants.
+     * @return DomainObjectSet<BaseVariant>?
+     */
+    fun getTestVariants(): DomainObjectSet<BaseVariant>? {
+        return if (android is TestedExtension) {
+            android.testVariants as DomainObjectSet<BaseVariant>
+        } else {
+            null
         }
     }
 

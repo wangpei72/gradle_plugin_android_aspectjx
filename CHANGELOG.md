@@ -2,6 +2,12 @@
 
 版本日志格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，版本号遵循 [语义化版本 2.0.0](https://semver.org/spec/v2.0.0.html)。
 
+## [3.3.2] - 2022-12-20
+
+### Fixed
+
+- 修复：androidTest构建错误问题（[#56](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/56)）
+
 ## [3.3.1] - 2022-10-25
 
 ### Fixed
@@ -80,7 +86,7 @@
 
 ### Fixed
 
-- 修复：Kotlin项目禁用插件或不需要进行任何织入时，会发送类丢失的问题（[#26](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/26)）
+- 修复：Kotlin项目禁用插件或不需要进行任何织入时，会发生类丢失的问题（[#26](https://github.com/wurensen/gradle_plugin_android_aspectjx/issues/26)）
 
 ## 2.0.14 (2021-12-07)
 
