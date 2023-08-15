@@ -1,6 +1,11 @@
 buildscript {
     repositories {
         mavenLocal()
+        maven {
+            url 'https://maven.aliyun.com/repository/google' }
+        maven {
+            url "https://mvnrepo.alibaba-inc.com/mvn/repository"
+        }
         google()
 
         maven {
@@ -10,7 +15,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.alibaba.intl.gradle:gradle-android-plugin-aspectjx:2.0.13-icbu2-heyi-SNAPSHOT'
+        classpath 'com.alibaba.intl.gradle:gradle-android-plugin-aspectjx:2.1.0-icbu2-heyi-SNAPSHOT'
     }
 }
 
@@ -35,6 +40,11 @@ if (project.file('local.properties').exists()) {
 allprojects {
     repositories {
         mavenLocal()
+        maven {
+            url 'https://maven.aliyun.com/repository/google' }
+        maven {
+            url "https://mvnrepo.alibaba-inc.com/mvn/repository"
+        }
         google()
         mavenCentral()
         maven {

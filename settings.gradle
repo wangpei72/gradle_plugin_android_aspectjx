@@ -31,8 +31,14 @@ pluginManagement {
     repositories {
         mavenLocal()
         maven {
-            url uri('/Users/heyi/work/wekitProj/gradle_upgrade/wekit_modules/gradle_plugin_android_aspectjx/aspectjx/snapshots')
+            url 'https://maven.aliyun.com/repository/google'
         }
+        maven {
+            url "https://mvnrepo.alibaba-inc.com/mvn/repository"
+        }
+//        maven {
+//            url uri('/Users/heyi/work/wekitProj/gradle_upgrade/wekit_modules/gradle_plugin_android_aspectjx/aspectjx/snapshots')
+//        }
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -42,13 +48,10 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         maven {
-            url uri('/Users/heyi/work/wekitProj/gradle_upgrade/wekit_modules/gradle_plugin_android_aspectjx/aspectjx/snapshots')
+            url 'https://maven.aliyun.com/repository/google'
         }
         maven {
-            url "https://mvnrepo.alibaba-inc.com/nexus/content/repositories/snapshots"
-        }
-        maven {
-            url "https://mvnrepo.alibaba-inc.com/nexus/content/repositories/releases"
+            url "https://mvnrepo.alibaba-inc.com/mvn/repository"
         }
         google()
         mavenCentral()
