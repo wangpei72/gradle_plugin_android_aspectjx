@@ -1,13 +1,15 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'io.github.wurensen.android-aspectjx'
+//    id 'gradle-android-plugin-aspectjx'
+//    id 'io.github.wurensen.android-aspectjx'
 }
 
-// ajx配置
+apply plugin: 'android-aspectjx'
+//// ajx配置
 aspectjx {
     // 是否debug，开启后会输出织入信息等相关日志（3.3.0版本新增）
-    debug = true
+//    debug = true
     // 是否启动
     enabled = true
     // 移除测试
@@ -46,7 +48,7 @@ android {
 }
 
 dependencies {
-    implementation project(':javalibrary')
+//    implementation project(':javalibrary')
     implementation project(':testlibrary')
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'

@@ -1,23 +1,38 @@
 pluginManagement {
     resolutionStrategy {
+        def modules = [
+                'android-aspectjx'  : 'com.alibaba.intl.gradle:gradle-android-plugin-aspectjx:2.0.13-icbu2-heyi-SNAPSHOT',
+        ]
         eachPlugin {
-            println "requested:$requested"
-            switch (requested.id.id) {
-                // agp不是所有版本都能通过plugins方式拉取到，统一采用classpath方式拉取
-                case "com.android.application":
-                case "com.android.library":
-                    def agpModule = "com.android.tools.build:gradle:${requested.version}"
-                    useModule(agpModule)
-                    break
-//                case "io.github.wurensen.android-aspectjx":
-//                    def agpModule = "io.github.wurensen:gradle-android-plugin-aspectjx:${requested.version}"
-//                    useModule(agpModule)
-//                    break
+            println "id=" + requested.id.id
+            def module = modules.get(requested.id.id)
+            if (module != null) {
+                useModule(module)
             }
         }
+
+
+//        eachPlugin {
+//            println "requested:$requested"
+//            switch (requested.id.id) {
+//                // agp不是所有版本都能通过plugins方式拉取到，统一采用classpath方式拉取
+//                case "com.android.application":
+//                case "com.android.library":
+//                    def agpModule = "com.android.tools.build:gradle:${requested.version}"
+//                    useModule(agpModule)
+//                    break
+////                case "io.github.wurensen.android-aspectjx":
+////                    def agpModule = "io.github.wurensen:gradle-android-plugin-aspectjx:${requested.version}"
+////                    useModule(agpModule)
+////                    break
+//            }
+//        }
     }
     repositories {
         mavenLocal()
+        maven {
+            url uri('/Users/heyi/work/wekitProj/gradle_upgrade/wekit_modules/gradle_plugin_android_aspectjx/aspectjx/snapshots')
+        }
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -26,11 +41,20 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
+        maven {
+            url uri('/Users/heyi/work/wekitProj/gradle_upgrade/wekit_modules/gradle_plugin_android_aspectjx/aspectjx/snapshots')
+        }
+        maven {
+            url "https://mvnrepo.alibaba-inc.com/nexus/content/repositories/snapshots"
+        }
+        maven {
+            url "https://mvnrepo.alibaba-inc.com/nexus/content/repositories/releases"
+        }
         google()
         mavenCentral()
     }
 }
-include ':aspectjx'
+//include ':aspectjx'
 include ':app'
 include ':testlibrary'
-include ':javalibrary'
+//include ':javalibrary'

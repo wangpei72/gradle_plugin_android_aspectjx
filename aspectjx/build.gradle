@@ -10,6 +10,13 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 
 // agp对应的其它依赖版本
 def agpDependencies = [
+        '7.4.0': [
+                'com.android.tools.build:gradle:7.4.0',
+                // AGP7.0.0开始内部依赖变更，之前一些传递依赖需要手动引入
+                // https://developer.android.com/studio/releases/gradle-plugin?buildsystem=ndk-build#classpath-change
+                'com.android.tools:common:30.0.3',
+                'commons-io:commons-io:2.4'
+        ],
         '7.2.2': [
                 'com.android.tools.build:gradle:7.2.2',
                 // AGP7.0.0开始内部依赖变更，之前一些传递依赖需要手动引入
@@ -30,7 +37,7 @@ def agpDependencies = [
 dependencies {
 
     // 依赖AGP
-    agpDependencies['7.2.2'].each {
+    agpDependencies['7.4.0'].each {
         compileOnly(it)
     }
 

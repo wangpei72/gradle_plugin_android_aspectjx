@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by LanceWu on 2022/12/19.<br>
- * TODO 类说明
+ * AOPLog注解的切面配置类
  */
 @Aspect
 public class LogAspect {
